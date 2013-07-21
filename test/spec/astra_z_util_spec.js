@@ -54,3 +54,41 @@ describe("Delegatable", function() {
       });
   });
 });
+
+describe("String", function() {
+
+  it ("#isWorld", function() {
+    expect("world".isWorld()).toBe(true);
+    expect("".isWorld()).toBe(false);
+    expect("<world>".isWorld()).toBe(false);
+  }); 
+
+  it ("#exec", function() {
+    expect(
+      "a is $0, b is $1, again $0".exec('A', 'B')
+    ).toEqual("a is A, b is B, again A");
+
+    expect(
+      "$0".exec("A")
+    ).toEqual("A");
+
+    /*
+    //pending
+    expect(
+      "1: \$0".exec("A")
+    ).toEqual("1: \$0");
+    */
+    expect(
+      function() {
+        "$1".exec("1")
+    }).toThrow();
+
+  });
+
+});
+
+describe("Array", function() {
+  it ("#second", function() {
+    expect([1,2,3].second()).toEqual(2);
+  });
+})
