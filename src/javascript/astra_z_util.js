@@ -1,4 +1,82 @@
 var c =function(m){ console.log(m);};
+
+
+/** section: Language, related to: Array
+ *  
+ *  Array#second -> ?
+ *  
+ *  #### Example
+ *
+ *  [1,2,3].second();
+ *  // -> 2
+ *
+**/
+Array.prototype.second = function() {
+  return this[1];
+}
+
+/** section: Language, related to: String
+ *  
+ *  String#isWorld -> Boolean
+ *  
+ *  Return true when String is world, otherwase - false.
+ *  
+ *  #### Example
+ *  
+ *  "world".isWorld();  // -> true  
+ *  "".isWorld();       // -> false
+ *  "<world>".isWorld() // -> false
+ *
+ *
+**/
+String.prototype.isWorld = function() {
+  if (this.blank())
+    return false;
+
+  return !/\W/.match(this.toString());
+}
+
+/** section: Language, related to: String
+ *  
+ *  String#exec -> String
+ *  
+ *  Execute string, as interpolate method.
+ *  
+ *  #### Example
+ *  
+ *  "a is $0, b is $1, again $0".exec('A', 'B'); 
+ *   // -> "a is A, b is B, again A"  
+ *  
+ *  #### Bugs
+ *  
+ *  "in \$0".exec("A");
+ *  // -> not should exec, but executes
+ *  
+ *
+**/
+String.prototype.exec = function() {
+  var r    = /\$(\d+)/,
+      args = [];
+      str  = this;
+  
+  for(var i = 0, l = arguments.length; i < l; i++)
+    args.push(arguments[i]);
+  
+  this.scan(r, function(x) {
+    var f = x.first().strip(),
+        s = parseInt(x.second()),
+        n = args[s];
+
+    if (Object.isUndefined(n))
+      throw new Error("Element with index `$0` not found in [$1]".exec(s, args));
+
+    str = str.gsub(new RegExp("\\"+f), n);   
+  })
+  return str;
+};
+
+
+
 var Delegatable = {
     /**
      *  Example
