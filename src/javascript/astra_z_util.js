@@ -1,6 +1,3 @@
-var c =function(m){ console.log(m);};
-
-
 /** section: Language, related to: Array
  *  
  *  Array#second -> ?

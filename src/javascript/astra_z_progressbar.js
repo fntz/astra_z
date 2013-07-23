@@ -1,10 +1,11 @@
 var ProgressBar = Class.create(Widget, {
   setup: function() {
     this.setting = {
-      width  : "60%", 
-      step   : 10, 
-      events : {}
+      width  : "60%", // default width   
+      step   : 10,    // in percent
+      events : {}     // callbacks for events
     };
+    this.events = $w("increment decrement");
   },
   create: function($super) {
     var html = $super(ProgressBar);
@@ -18,11 +19,13 @@ var ProgressBar = Class.create(Widget, {
     var w  = this.bar.getWidth();
     var nw = "$0px".exec(parseInt(this.step+w));
     this.bar.setStyle({"width":nw});
+    this.on_increment(nw);
   },
   decrement: function() {
     var w  = this.bar.getWidth();
     var nw = "$0px".exec(parseInt(w-this.step));
     this.bar.setStyle({"width":nw});
+    this.on_decrement(nw);
   }
 });
 ProgressBar.config = "(div.bar)"

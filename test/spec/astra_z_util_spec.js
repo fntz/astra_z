@@ -64,6 +64,7 @@ describe("String", function() {
   }); 
 
   it ("#exec", function() {
+    
     expect(
       "a is $0, b is $1, again $0".exec('A', 'B')
     ).toEqual("a is A, b is B, again A");
@@ -78,6 +79,7 @@ describe("String", function() {
       "1: \$0".exec("A")
     ).toEqual("1: \$0");
     */
+
     expect(
       function() {
         "$1".exec("1")

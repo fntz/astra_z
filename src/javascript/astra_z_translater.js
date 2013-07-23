@@ -16,7 +16,18 @@ var ZElement = Class.create(Delegatable, {
     this.element.insert(z.element);
   }
 })
-
+/** section Modules  
+ *  
+ *  Provides base interface for creation elements from String
+ *  with given rules.
+ *
+ *  #### Example
+ *  
+ *  var z = "(div.class1#id1)";
+ *  Translater.translate(z); 
+ *  // -> <div class='astra-z-div'> <div class='class1' id='id1'></div></div>  
+ *   
+**/
 var Translater = {
 
   translate: function(str) {
@@ -29,12 +40,12 @@ var Translater = {
         tokens.push(s.first());
     });
     
-    var root = new ZElement("div", 
-      {"class": Translater.default_class_name});
+    var root = null;//new ZElement("div", 
+     // {"class": Translater.default_class_name});
     
     var begin_element = 0, 
         end_element = 0,
-        elements = [root],
+        elements = [],
         element = root;
 
     for(var i = 0, n = i+1, p = i - 1, 
@@ -52,7 +63,13 @@ var Translater = {
         
         if (next.isWorld()) {
           element = new ZElement(next);
-          elements.last().insert(element);
+          var last = elements.last();
+          
+          if (last)
+            elements.last().insert(element);
+          else {
+            root = element;
+          }  
           elements.push(element);
         } else {
           throw "Expected <tag> but $0 given".exec(next);  
@@ -103,5 +120,7 @@ var Translater = {
     }
   }
 };
-
+/**
+ * Default class name for element.
+**/
 Translater.default_class_name = "astra-z-div";
