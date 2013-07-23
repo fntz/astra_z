@@ -8,13 +8,12 @@ describe("Translater", function() {
     var t = Translater.translate(z);
     var e = t.element;
 
-    expect(e).toHaveClass(Translater.default_class_name);
     expect(e.down('span')).toHaveId('span1');
     expect(e.down('span').next()).toHaveClass('class1');
     expect(e.down('span').next()).toHaveClass('class2');
     expect(e.down('span').next().down()).toHaveClass('class1');
     expect(e.down('span').next().down()).toHaveId('id1');
-    expect(e.descendants().size()).toEqual(5);
+    expect(e.descendants().size()).toEqual(4);
 
   });
 
