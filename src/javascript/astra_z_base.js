@@ -31,7 +31,7 @@ var Widget = Class.create(EventsModule, {
     this.create(this.html);
   },
   create: function(klass) {
-    var html = Translater.translate(klass.config);
+    var html = Translator.translate(klass.config);
     return html;
   }
 }); 

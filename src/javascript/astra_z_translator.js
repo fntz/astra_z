@@ -24,11 +24,11 @@ var ZElement = Class.create(Delegatable, {
  *  #### Example
  *  
  *  var z = "(div.class1#id1)";
- *  Translater.translate(z); 
+ *  Translator.translate(z); 
  *  // -> <div class='astra-z-div'> <div class='class1' id='id1'></div></div>  
  *   
 **/
-var Translater = {
+var Translator = {
 
   translate: function(str) {
 
@@ -40,13 +40,11 @@ var Translater = {
         tokens.push(s.first());
     });
     
-    var root = null;//new ZElement("div", 
-     // {"class": Translater.default_class_name});
-    
     var begin_element = 0, 
         end_element = 0,
         elements = [],
-        element = root;
+        root = null,
+        element;
 
     for(var i = 0, n = i+1, p = i - 1, 
             length = tokens.length, 
@@ -120,7 +118,3 @@ var Translater = {
     }
   }
 };
-/**
- * Default class name for element.
-**/
-Translater.default_class_name = "astra-z-div";
