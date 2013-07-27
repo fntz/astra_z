@@ -94,9 +94,14 @@ describe("Array", function() {
     expect([1,2,3].second()).toEqual(2);
   });
 
-  it ("#empty", function() {
-    expect([1,2,3].empty()).toEqual(false);
-    expect([].empty()).toEqual(true);
+  it ("#isEmpty", function() {
+    expect([1,2,3].isEmpty()).toEqual(false);
+    expect([].isEmpty()).toEqual(true);
+  });
+
+  it ("#diff", function() {
+    expect([1,2,3].diff([1])).toEqual([2,3]);
+    expect([].diff([1])).toEqual([]);
   });
 })
 
@@ -159,8 +164,8 @@ describe("Hash", function() {
     
   });
 
-  it ("#empty", function() {
-    expect($H({a:1}).empty()).toEqual(false);
-    expect($H({}).empty()).toEqual(true);
+  it ("#isEmpty", function() {
+    expect($H({a:1}).isEmpty()).toEqual(false);
+    expect($H({}).isEmpty()).toEqual(true);
   });
 });
