@@ -134,10 +134,10 @@ describe("Hash", function() {
   it ("#mergeWith", function() {
     var h1 = $H({a: 1, b: 2, c: 2});
     var func = function(v1, v2) { return v1 + v2;};
-    //var h2 = h1.mergeWith({a: 3, b: 4, c: 5, d: 9}, func);
-    //expect($H({'a': 4, 'b': 6, 'c': 7, 'd': 9})).toEqual(h2);
+    var h2 = h1.mergeWith({a: 3, b: 4, c: 5, d: 9}, func);
+    expect($H({'a': 4, 'b': 6, 'c': 7, 'd': 9})).toEqual(h2);
     /*TypeError when function not defined*/
-    //expect(function(){h1.mergeWith({});}).toThrow();
+    expect(function(){h1.mergeWith({});}).toThrow();
   });
 
   it ("#updateWith", function() {
@@ -146,8 +146,8 @@ describe("Hash", function() {
     var z = $H({a: 1});
     var n = z.updateWith(z, function(v1, v2) {});
     expect(n).toEqual(z);
+
     
-    /*
     h.updateWith({a: 3, b: 4, c: 5, d: 9}, func);
     expect($H({'a': 4, 'b': 6, 'c': 7, 'd': 9})).toEqual(h);
     
@@ -156,7 +156,7 @@ describe("Hash", function() {
         h.updateWith({});
       }
     ).toThrow();
-    */
+    
   });
 
   it ("#empty", function() {
