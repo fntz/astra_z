@@ -10,30 +10,50 @@
 **/
 Array.prototype.second = function() {
   return this[1];
-}
+};
 
 /** section: Language, related to: Array
  *  
- *  Array#empty -> Boolean
+ *  Array#isEmpty -> Boolean
  *  
  *  #### Example
  *
- *  [1,2,3].empty();
+ *  [1,2,3].isEmpty();
  *  // -> false
- *  [].empty(); 
+ *  [].isEmpty(); 
  *  // -> true 
  *
 **/
-Array.prototype.empty = function() {
+Array.prototype.isEmpty = function() {
   return this.length == 0;
-}
+};
+
+/** section: Language, related to: Array
+ *  
+ *  Array#diff(arr) -> Array
+ *  - arr (Array): Array for compare 
+ *  
+ *  Returns new Array from original array, without elements which
+ *  contains in arr.  
+ *
+ *  #### Example
+ *
+ *  [1,2,3].diff([1]);
+ *  // -> [2,3]
+ *  [].diff([1]); 
+ *  // -> []
+ *
+**/
+Array.prototype.diff = function(arr) {
+  return this.filter(function(z){ return !arr.include(z); })
+};
 
 /** section: Language, related to: Hash
  *
 **/
 Hash.addMethods({
   /**
-   *  Hash#empty() -> Boolean
+   *  Hash#isEmpty() -> Boolean
    * 
    *  Return `true` when Hash not contained the elements,
    *  otherwise return `false`.
@@ -41,14 +61,14 @@ Hash.addMethods({
    *  ##### Example
    *
    *      var hash = $H({a : 1});
-   *      hash.empty(); 
+   *      hash.isEmpty(); 
    *      // -> false
-   *      $H({}).empty();
+   *      $H({}).isEmpty();
    *      // -> true
    * 
   **/
-  empty: function() {
-    return this.keys().empty();
+  isEmpty: function() {
+    return this.keys().isEmpty();
   },
   /**
    *  Hash#eachKey(iterator[, context]) -> Hash 
@@ -128,7 +148,7 @@ Hash.addMethods({
     if (!Object.isFunction(func))
       throw new TypeError();
 
-    if (this.empty()) {
+    if (this.isEmpty()) {
       return this.update(object);
     }
 
@@ -181,7 +201,7 @@ String.prototype.isWorld = function() {
     return false;
 
   return !/\W/.match(this.toString());
-}
+};
 
 /** section: Language, related to: String
  *  
