@@ -17,6 +17,22 @@ describe("Translator", function() {
 
   });
 
+  it("translate with binded", function() {
+    var z = "(div.class1~1(div.class3!1)(div.class2~1)(div.class4~2)(div.class5!2))",
+        t = Translator.translate(z),
+        b = t.binded,
+        h = b.first();
+
+    expect(b.size()).toEqual(2);
+    expect(h.get("from")).toEqual(['class1', 'class2']);
+    expect(h.get("to")).toEqual(['class3']);  
+
+    var e = "(div.class1~1)";
+    expect(
+      function() { Translator.translate(e); }
+    ).toThrow();  
+  });
+
   it ("error when after `(` follow not tag", function() {
     var z = "(#)";
     expect(
