@@ -61,6 +61,7 @@ describe("String", function() {
     expect("world".isWorld()).toBe(true);
     expect("".isWorld()).toBe(false);
     expect("<world>".isWorld()).toBe(false);
+    expect("abc-cde".isWorld()).toBe(true);
   }); 
 
   it ("#exec", function() {

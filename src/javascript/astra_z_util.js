@@ -200,7 +200,7 @@ String.prototype.isWorld = function() {
   if (this.blank())
     return false;
 
-  return !/\W/.match(this.toString());
+  return !/[^A-Za-z0-9_-]/.match(this);
 };
 
 /** section: Language, related to: String
