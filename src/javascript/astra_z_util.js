@@ -14,7 +14,7 @@ Array.prototype.second = function() {
 
 /** section: Language, related to: Array
  *  
- *  Array#empty -> bool
+ *  Array#empty -> Boolean
  *  
  *  #### Example
  *
@@ -28,7 +28,28 @@ Array.prototype.empty = function() {
   return this.length == 0;
 }
 
+/** section: Language, related to: Hash
+ *
+**/
 Hash.addMethods({
+  /**
+   *  Hash#empty() -> Boolean
+   * 
+   *  Return `true` when Hash not contained the elements,
+   *  otherwise return `false`.
+   * 
+   *  ##### Example
+   *
+   *      var hash = $H({a : 1});
+   *      hash.empty(); 
+   *      // -> false
+   *      $H({}).empty();
+   *      // -> true
+   * 
+  **/
+  empty: function() {
+    return this.keys().empty();
+  },
   /**
    *  Hash#eachKey(iterator[, context]) -> Hash 
    * 
@@ -107,6 +128,10 @@ Hash.addMethods({
     if (!Object.isFunction(func))
       throw new TypeError();
 
+    if (this.empty()) {
+      return this.update(object);
+    }
+
     var keys = this.keys();
     var newHash = new Hash(object).inject(this, function(result, pair) {
       var value = keys.include(pair.key)? func(this.get(pair.key), pair.value) : pair.value;
@@ -141,7 +166,7 @@ Hash.addMethods({
  *  
  *  String#isWorld -> Boolean
  *  
- *  Return true when String is world, otherwase - false.
+ *  Return true when String is world, otherwise - false.
  *  
  *  #### Example
  *  
