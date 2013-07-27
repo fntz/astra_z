@@ -93,4 +93,9 @@ describe("Array", function() {
   it ("#second", function() {
     expect([1,2,3].second()).toEqual(2);
   });
+
+  it ("#empty", function() {
+    expect([1,2,3].empty()).toEqual(false);
+    expect([].empty()).toEqual(true);
+  });
 })
