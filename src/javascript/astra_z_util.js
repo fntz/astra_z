@@ -12,6 +12,22 @@ Array.prototype.second = function() {
   return this[1];
 }
 
+/** section: Language, related to: Array
+ *  
+ *  Array#empty -> bool
+ *  
+ *  #### Example
+ *
+ *  [1,2,3].empty();
+ *  // -> false
+ *  [].empty(); 
+ *  // -> true 
+ *
+**/
+Array.prototype.empty = function() {
+  return this.length == 0;
+}
+
 /** section: Language, related to: String
  *  
  *  String#isWorld -> Boolean
