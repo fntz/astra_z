@@ -1,3 +1,10 @@
+Element.addMethods({
+  diff_and_build: function(original, z) {
+    
+  }
+});
+
+
 /** section: Language, related to: Array
  *  
  *  Array#second -> ?

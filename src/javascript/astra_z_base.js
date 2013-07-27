@@ -2,7 +2,6 @@ var c = function(m){console.log(m);};
 var EventsModule = {
 
   create_events: function() {
-    
     var self = this;
     this.events.each(function(event) {
       var f = "on_$0".exec(event);
@@ -29,10 +28,20 @@ var Widget = Class.create(EventsModule, {
     Object.extend(this.classes, classes || {});
 
     this.create(this.html);
+    this.bind_event();
   },
-  create: function(klass) {
-    var html = Translator.translate(klass.config);
+  create: function() { //TODO: take config, config from setting
+    var html = Translator.translate(this.setting.config);
     return html;
+  },
+  bind_event: function() {
+    if (this.setting.on) {
+      var handler = this.on.bind(this);
+      this.element.observe(this.setting.on, handler);
+    }
+  },
+  on: function(event) {
+    
   }
 }); 
 

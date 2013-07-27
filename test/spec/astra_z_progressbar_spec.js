@@ -13,8 +13,7 @@ describe("ProgressBar", function() {
 
   it ("setting", function() {
     var z = new ProgressBar("bar");
-
-    expect(Object.keys(z.setting).size()).toEqual(3);
+    expect(Object.keys(z.setting).size()).toEqual(4);
   });
 
   it ("increment", function() {

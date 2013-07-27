@@ -61,9 +61,6 @@ describe("Translator", function() {
     ).toThrow();
   }); 
 
-  
-
-
 });
 
 
