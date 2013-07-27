@@ -1,6 +1,39 @@
 Element.addMethods({
+  getId: function(element) {
+    return element.id || null;
+  },
+  classes: function(element) {
+    return $w(element.readAttribute('class'));
+  },
+  getAttributes: function(element) {
+    var hash = $H();
+    for (var i = 0, attrs = element.attributes, 
+             length = attrs.length,
+             value, key; 
+             i < length;
+             i++ 
+        ) {
+      key = attrs.item(i).nodeName;
+      value = attrs.item(i).nodeValue;
+      
+      if (key == 'class')
+        value = $w(value);
+
+      if (key.startsWith("data-")) {
+        var tmp  = hash.getOrBuild("data", $H({})),  
+            name = /data-(.+)/.exec(key).second();
+        tmp.set(name, value);
+        continue ;
+      }
+      hash.set(key, value);
+    }
+    return hash;
+  },
   diff_and_build: function(original, z) {
-    
+    var diff = function(e1, e2) {
+      
+          
+    }
   }
 });
 
@@ -59,6 +92,59 @@ Array.prototype.diff = function(arr) {
  *
 **/
 Hash.addMethods({
+  /**
+   *  Hash#getOrBuild(key [, set_value]) -> ?
+   *  - key (String): key for find
+   *  - set_value (?): return when value not found. And added into hash 
+   *    
+   *  Update hash with `set_value` when `value` with `key` not found.
+   * 
+   *  ##### Example
+   *
+   *      var hash = $H({a : 1});
+   *      hash.getOrBuild("a", 10); 
+   *      // -> 1
+   *      hash.getOrBuild("b", 10);
+   *      // -> 10
+   *      hash.inspect(); 
+   *      // #<Hash:{'a': 1, 'b': 10}>
+   */
+  getOrBuild: function(key, set_value) {
+    var value = this.get(key);
+    
+    if (!value){
+      this.set(key, set_value);
+      return set_value;
+    }
+    return value;
+  },
+  /**
+   *  Hash#getOrElse(key [, default]) -> ?
+   *  - key (String): key for find
+   *  - default (?): return when value not found
+   *
+   *  Return `value` from Hash with `key`,
+   *  when value not found.
+   * 
+   *  ##### Example
+   *
+   *      var hash = $H({a : 1});
+   *      hash.getOrEmpty("a"); 
+   *      // -> 1
+   *      $H({a:1}).getOrElse("b", {b:1});
+   *      // -> "#<Hash:{'b': 1}>"
+   *      $H({a:1}).getOrElse("b", 10);
+   *      // -> 10
+   *      $H({a:1}).getOrElse("a", 10);
+   *      // -> 1  
+  **/
+  getOrElse: function(key, object) {
+    var value = this.get(key);
+    if (!value)
+      return object || {};
+    
+    return value;   
+  },
   /**
    *  Hash#isEmpty() -> Boolean
    * 

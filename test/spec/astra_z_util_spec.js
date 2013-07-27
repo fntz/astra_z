@@ -1,4 +1,43 @@
+describe("Element", function() {
+  it ("#getId", function() {
+    var e = new Element('div', {"id": "id1"});
+    var k = new Element('div');
+    expect(e.getId()).toEqual('id1');
+    expect(k.getId()).toEqual(null);
+  });
 
+  it ("#classes", function() {
+    var e = new Element('div', {"class": "k1 k2 k3"});
+    var k = new Element('div');
+    expect(e.classes()).toEqual(["k1", "k2", "k3"]);
+    expect(k.classes()).toEqual([]);
+  });
+
+  it ("#getAttributes", function() {
+    var opt = {
+      "class"   : "k1 k2 k3",
+      "id"      : "a_id",
+      "href"    : "http://example.com",
+      "data-abc": "a",
+      "data-cde": "b",
+      "data-f"  : "c"
+    };
+    var e = new Element('a', opt);
+    var z = e.getAttributes();
+    
+    expect(z).toEqual($H({
+      "class" : $w("k1 k2 k3"),
+      "id"    : "a_id",
+      "href"  : "http://example.com",
+      "data"  : $H({
+        "abc" : "a",
+        "cde" : "b",
+        "f"   : "c"
+      })
+    }));  
+    
+  });
+});
 
 describe("Delegatable", function() {
   it("delegate", function() {
@@ -107,6 +146,21 @@ describe("Array", function() {
 })
 
 describe("Hash", function() {
+  it ("#getOrBuild", function(){
+    var h = $H({a: 1});
+    expect(h.getOrBuild("a")).toEqual(1);
+    expect(h.getOrBuild("b", 10)).toEqual(10);
+    expect(h).toEqual($H({"a":1, "b": 10}));
+  });
+
+  it ("#getOrElse", function() {
+    expect($H({a : 1}).getOrElse("a")).toEqual(1); 
+    expect($H({a:1}).getOrElse("b", {b:1})).toEqual({"b":1});
+    expect($H({a:1}).getOrElse("b", 10)).toEqual(10);
+    expect($H({a:1}).getOrElse("a", 10)).toEqual(1);
+    expect($H({a:1}).getOrElse("b")).toEqual({});
+  });
+
   it ("#eachKey", function() {
     var hash = $H({a:1, b:2, c:3});
     var keys = [];
