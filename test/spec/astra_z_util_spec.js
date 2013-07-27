@@ -99,3 +99,58 @@ describe("Array", function() {
     expect([].empty()).toEqual(true);
   });
 })
+
+describe("Hash", function() {
+  it ("#eachKey", function() {
+    var hash = $H({a:1, b:2, c:3});
+    var keys = [];
+    hash.eachKey(function(key) {
+      keys.push(key);
+    });
+    expect(['a', 'b', 'c']).toEqual(keys);
+  });
+
+  it ("#eachValue", function() {
+    var hash = $H({a:1, b:2, c:3});
+    var values = [];
+    hash.eachValue(function(value) {
+      values.push(value);
+    });
+    expect([1, 2, 3]).toEqual(values);
+  });
+
+  it ("#eachPair", function() {
+    var hash = $H({a:1, b:2, c:3});
+    var keys = [];
+    var values = [];
+    hash.eachPair(function(key, value) {
+      keys.push(key);
+      values.push(value);
+    });
+    expect([1, 2, 3]).toEqual(values);
+    expect(['a', 'b', 'c']).toEqual(keys);
+  });
+
+  it ("#mergeWith", function() {
+    var h1 = $H({a: 1, b: 2, c: 2});
+    var func = function(v1, v2) { return v1 + v2;};
+    var h2 = h1.mergeWith({a: 3, b: 4, c: 5, d: 9}, func);
+    expect($H({'a': 4, 'b': 6, 'c': 7, 'd': 9})).toEqual(h2);
+    /*TypeError when function not defined*/
+    expect(function(){h1.mergeWith({});}).toThrow();
+  });
+
+  it ("#updateWith", function() {
+    var h = $H({a: 1, b: 2, c: 2});
+    var func = function(v1, v2) { return v1 + v2;};
+    h.updateWith({a: 3, b: 4, c: 5, d: 9}, func);
+    expect($H({'a': 4, 'b': 6, 'c': 7, 'd': 9})).toEqual(h);
+    
+    expect(
+      function() {
+        h.updateWith({});
+      }
+    ).toThrow();
+    
+  });
+});
