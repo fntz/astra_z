@@ -5,6 +5,7 @@ var c = function(m){console.log(m)};
 var ZElement = Class.create(Delegatable, {
   initialize: function(element, attrs) {
     this.element = new Element(element, attrs || {});
+    this.elements = [];
     this.binded  = [];
 
     this.delegate("element", 
@@ -13,6 +14,7 @@ var ZElement = Class.create(Delegatable, {
                   "descendants");
   },
   insert: function(z) {
+    this.elements.push(z);
     this.element.insert(z.element);
   }
 })
@@ -36,10 +38,14 @@ var Translator = {
     
     str.scan(/[a-zA-Z0-9-]+|./, function(s) {
       var t = s.first().strip();
+      
       if (!t.blank())
         tokens.push(s.first());
     });
     
+    var group_a = [],
+        group_b = [];
+
     var begin_element = 0, 
         end_element = 0,
         elements = [],
@@ -95,6 +101,41 @@ var Translator = {
           throw "Expected `class name`, but given `$0`".exec(next);
         }
       }
+
+      else if (current == "~") {
+        if (prev.isWorld()) {
+          var hash = group_a.detect(function(hash) {
+            return hash.keys().first() == next; 
+          }) || $H();
+          var new_hash = $H({});
+          new_hash.set(next, [prev]);
+          hash.updateWith(new_hash, function(v1, v2) {
+            var v = v1.concat(v2);
+            return v;
+          });
+          group_a.push(hash)
+        } else {
+          throw "Unexpected `$0` before bind `$1`".exec(prev, current);
+        }
+      }
+
+      else if (current == "!") {
+        
+        if (prev.isWorld()) {
+          var hash = group_b.detect(function(hash) {
+            return hash.keys().first() == next; 
+          }) || $H();
+          var new_hash = $H({});
+          new_hash.set(next, [prev]);
+          hash.updateWith(new_hash, function(v1, v2) {
+            var v = v1.concat(v2);
+            return v;
+          });
+          group_b.push(hash)
+        } else {
+          throw "Unexpected `$0` before bind `$1`".exec(prev, current);
+        }
+      }    
       
       else if (current == "#") {
         if (next.isWorld()) {
@@ -114,6 +155,36 @@ var Translator = {
       root = null;
       throw "Not balance `(` `)`";
     } else {
+      var _group_a = group_a.uniq(),
+          _group_b = group_b.uniq();
+      
+
+      if (!_group_a.isEmpty()){    
+        if (_group_a.size() != _group_b.size()) {
+          throw "Binded groupd have different size. `$0` and `$1`.\
+          Inspect: $2, $3".exec(_group_a.size(), _group_b.size(),
+            _group_a.inspect(), _group_b.inspect());
+        }
+        
+        for(var len = _group_a.size(), i = 0, 
+                hash, f_value, new_hash, key, value; 
+                i < len; i ++) {
+          new_hash = new Hash();
+          
+          key   = _group_a[i].keys().first();
+          value = _group_a[i].get(key);
+          
+          f_value = _group_b.detect(function(hash) {
+            return hash.keys().first() == key;
+          }).get(key);
+          
+          new_hash.set("from", value);
+          new_hash.set("to", f_value);
+          
+          root.binded.push(new_hash)
+        }
+      }    
+          
       return root;
     }
   }
