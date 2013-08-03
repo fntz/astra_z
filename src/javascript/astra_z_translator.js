@@ -20,6 +20,28 @@ var ZElement = Class.create(Delegatable, {
   diff_and_build: function(html) {
     var element = $(html);
     
+    var original = element;//.descendants();
+    var need = this.element;//.descendants();
+
+    var diff = function(e1, e2) {
+      var c1 = e1.childElements(),
+          c2 = e2.childElements();
+      
+      for(var i = 0, l = c2.size(); i < l; i++) {
+        var need = c2[i],
+            have = c1[i];
+
+        if (need == have) { //equal
+          continue;
+        } else {
+          e1.insert(need);
+        }    
+      }
+
+    };
+
+    diff(original, need)  
+
     //e1 - original
     //e2 - this
     var diff_attrs = function(e1, e2) {
@@ -40,10 +62,10 @@ var ZElement = Class.create(Delegatable, {
 
     //diff_attrs(element, this.element);  
     
-    
 
 
-    
+
+
   }
 })
 /** section Modules  
@@ -103,7 +125,12 @@ var Translator = {
             root = element;
           }  
           elements.push(element);
-        } else {
+        } 
+        else if (next == "*") {
+          continue;
+        }
+
+        else {
           throw "Expected <tag> but $0 given".exec(next);  
         }
       }
@@ -173,6 +200,24 @@ var Translator = {
         }
       }
       
+      else if (current == "*") {
+        if (!element) 
+          throw "Element not found";
+
+        //(*)
+        if (prev == "(" && next == ")") { 
+          element.writeAttribute("data-repeat", "1");
+        } 
+        //(tag)*
+        else if (prev == ")" &&  
+          ((next && next.isWorld()) || next == ")" || Object.isUndefined(next))) {
+          element.writeAttribute("data-more", "1");
+        } 
+        else {
+          throw "Unexpected `$0` between `$1` and `$2`".exec(current, prev, next);
+        }
+      }
+
       else {
         throw "Unexpected $0".exec(current);
       }

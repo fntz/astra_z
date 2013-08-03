@@ -33,6 +33,15 @@ describe("Translator", function() {
     ).toThrow();  
   });
 
+  it ("translate repeat and more", function() {
+    var z = "(div(div.class1(*))*)",
+        t = Translator.translate(z),
+        e = t.element;    
+    
+    expect(e.down().readAttribute("data-more")).toEqual("1"); 
+    expect(e.down().readAttribute("data-repeat")).toEqual("1");
+  });
+
   it ("error when after `(` follow not tag", function() {
     var z = "(#)";
     expect(
