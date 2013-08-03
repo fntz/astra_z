@@ -223,4 +223,58 @@ describe("Hash", function() {
     expect($H({a:1}).isEmpty()).toEqual(false);
     expect($H({}).isEmpty()).toEqual(true);
   });
+
+  it ("#toObj", function() {
+    var h = $H({
+      a: 1,
+      b: $H({
+        c: "test",
+        d: $H({
+          a: 10,
+          b: $H({
+            z: 123
+          })
+        })
+      })
+    });
+
+    var x = h.toObj();
+    expect(x["a"]).toEqual(1)
+    expect(x["b"]).toEqual({
+      "c": "test",
+      "d": {
+        "a": 10,
+        "b": {
+          "z": 123
+        } 
+      }
+    });
+  });
+
+  it ("#toJ", function() {
+    var h = $H({
+      a: 1,
+      b: $H({
+        c: "test",
+        d: $H({
+          a: 10,
+          b: $H({
+            z: 123
+          })
+        })
+      })
+    });
+
+    var x = h.toJ();
+    expect(x["a"]).toEqual(1)
+    expect(x["b"]).toEqual({
+      "c": "test",
+      "d": {
+        "a": 10,
+        "b": {
+          "z": 123
+        } 
+      }
+    });
+  });
 });

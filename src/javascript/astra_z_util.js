@@ -28,12 +28,6 @@ Element.addMethods({
       hash.set(key, value);
     }
     return hash;
-  },
-  diff_and_build: function(original, z) {
-    var diff = function(e1, e2) {
-      
-          
-    }
   }
 });
 
@@ -93,6 +87,61 @@ Array.prototype.diff = function(arr) {
 **/
 Hash.addMethods({
   /**
+   *  Hash#toObj() -> Object
+   *    
+   *  Returns Object representation of Hash.
+   
+   *  ##### Example
+   *
+   *     var hash = $H({
+   *       a: 1,
+   *       b: $H({
+   *         c: "dsa",
+   *         d: $H({
+   *           a: 10,
+   *           b: $H({
+   *             z: 123
+   *           })
+   *         })
+   *       })
+   *     }); 
+   *    
+   *     hash.toObj(); 
+   *     // -> {a: 1, b: Object}   
+   *     hash.toObject();
+   *     // -> {a: 1, b: klass}   
+   * 
+  **/
+  toObj: function() {
+    if (this.isEmpty()) 
+      return {};
+
+    var o = {};
+
+    for(var i = 0, length = this.size(), key, value; 
+        i < length; 
+        i ++) {
+      
+      key = this.keys()[i];
+      value = this.get(key)
+      
+      if (Object.isHash(value)) {
+        o[key] = value.toObj();
+      } else {
+        o[key] = value;
+      }
+    }
+
+    return o;
+  },
+  /**
+   *  alias for `toObj`
+   * 
+  **/
+  toJ: function() {
+    return this.toObj();
+  },
+  /**
    *  Hash#getOrBuild(key [, set_value]) -> ?
    *  - key (String): key for find
    *  - set_value (?): return when value not found. And added into hash 
@@ -108,7 +157,7 @@ Hash.addMethods({
    *      // -> 10
    *      hash.inspect(); 
    *      // #<Hash:{'a': 1, 'b': 10}>
-   */
+  **/
   getOrBuild: function(key, set_value) {
     var value = this.get(key);
     
