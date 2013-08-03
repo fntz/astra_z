@@ -128,6 +128,11 @@ describe("String", function() {
 
   });
 
+  it ("#exclude", function() {
+    expect("hello".exclude("lo")).toEqual(false);
+    expect("hello".exclude("ol")).toEqual(true);
+  });
+
 });
 
 describe("Array", function() {

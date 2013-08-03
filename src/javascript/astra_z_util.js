@@ -347,6 +347,25 @@ String.prototype.isWorld = function() {
 
 /** section: Language, related to: String
  *  
+ *  String#exclude(str) -> Boolean
+ *  - str (String): string for check  
+ *
+ *  Return true when String not contain `str`, otherwise - false.
+ *  
+ *  #### Example
+ *  
+ *  "hello".exclude("lo");  
+ *  // -> false  
+ *  "hello".isWorld("ol");       
+ *  // -> true
+ *
+**/
+String.prototype.exclude = function(str) {
+  return !this.include(str);
+};
+
+/** section: Language, related to: String
+ *  
  *  String#exec -> String
  *  
  *  Execute string, as interpolate method.
