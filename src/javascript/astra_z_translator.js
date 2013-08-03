@@ -16,6 +16,33 @@ var ZElement = Class.create(Delegatable, {
   insert: function(z) {
     this.elements.push(z);
     this.element.insert(z.element);
+  },
+  diff_and_build: function(html) {
+    var element = $(html);
+    
+    //e1 - original
+    //e2 - this
+    var diff_attrs = function(e1, e2) {
+      var a_e1 = e1.getAttributes(),
+          a_e2 = e2.getAttributes();
+
+      var keys = Object.keys(a_e2);
+      for(var i = 0, l = keys.size(), value, key; i<l;i++) {
+        key = keys[i];
+        value = a_e2[key];
+        if (key == "class") {
+          value.each(function(k){ e1.addClassName(k); });
+        } else {
+          e1.writeAttribute(key, value);
+        }      
+      }        
+    };
+
+    //diff_attrs(element, this.element);  
+    
+    
+
+
   }
 })
 /** section Modules  

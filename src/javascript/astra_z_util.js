@@ -27,7 +27,7 @@ Element.addMethods({
       }
       hash.set(key, value);
     }
-    return hash;
+    return hash.toJ();
   }
 });
 

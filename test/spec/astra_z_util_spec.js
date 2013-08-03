@@ -25,17 +25,18 @@ describe("Element", function() {
     var e = new Element('a', opt);
     var z = e.getAttributes();
     
-    expect(z).toEqual($H({
+    expect(z).toEqual({
       "class" : $w("k1 k2 k3"),
       "id"    : "a_id",
       "href"  : "http://example.com",
-      "data"  : $H({
+      "data"  : {
         "abc" : "a",
         "cde" : "b",
         "f"   : "c"
-      })
-    }));  
+      }
+    });  
     
+
   });
 });
 
