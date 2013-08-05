@@ -17,57 +17,68 @@ var ZElement = Class.create(Delegatable, {
     this.elements.push(z);
     this.element.insert(z.element);
   },
-  diff_and_build: function(html) {
-    var element = $(html);
-    
-    var original = element;//.descendants();
-    var need = this.element;//.descendants();
-
-    var diff = function(e1, e2) {
-      var c1 = e1.childElements(),
-          c2 = e2.childElements();
-      
-      for(var i = 0, l = c2.size(); i < l; i++) {
-        var need = c2[i],
-            have = c1[i];
-
-        if (need == have) { //equal
-          continue;
-        } else {
-          e1.insert(need);
-        }    
-      }
-
-    };
-
-    diff(original, need)  
+  build: function(original) {
+    var original = $(original);
 
     //e1 - original
     //e2 - this
-    var diff_attrs = function(e1, e2) {
-      var a_e1 = e1.getAttributes(),
-          a_e2 = e2.getAttributes();
+    var diff_attrs = function(original, scheme) {
+      var orig = original.getAttributes(),
+          self = scheme.getAttributes();
 
-      var keys = Object.keys(a_e2);
+      var keys = Object.keys(self);
       for(var i = 0, l = keys.size(), value, key; i<l;i++) {
-        key = keys[i];
-        value = a_e2[key];
+        key   = keys[i];
+        value = self[key];
+        if (key == "data")
+          continue;
         if (key == "class") {
-          value.each(function(k){ e1.addClassName(k); });
+          value.each(function(k){ original.addClassName(k); });
         } else {
-          e1.writeAttribute(key, value);
+          original.writeAttribute(key, value);
         }      
       }        
     };
 
-    //diff_attrs(element, this.element);  
+    var need = this.element.descendants();
+    var have = original.descendants();
+
+    var i = 0, j = 0, k = [];
+
+    while(true) {
+      var current = need[i], 
+          orig    = have[j];
+      
+      if (!orig || !current) {
+        break;
+      }
+    
+      if (current.hasAttribute("data-repeat")) {
+        k.push(i);
+        i = k.pop();
+      }
+            
+      diff_attrs(orig, current)
+
+      i++;
+      j++;
+
+      if (current.hasAttribute("data-more")) {
+        i = 0;  
+      }
+
+      if (i > need.size() || j > have.size()) {
+        break;
+      }
+      
+    } 
     
 
-
-
-
   }
-})
+});
+
+
+
 /** section Modules  
  *  
  *  Provides base interface for creation elements from String
