@@ -36,6 +36,15 @@ describe("Element", function() {
       }
     });  
     
+    var x = e.getAttributes(true);
+    expect(x).toEqual({
+      "class"    : "k1 k2 k3",
+      "id"       : "a_id",
+      "href"     : "http://example.com",
+      "data-abc" : "a",
+      "data-cde" : "b",
+      "data-f"   : "c"
+    });
 
   });
 });

@@ -1,12 +1,81 @@
 Element.addMethods({
+  /** section: Dom, related to: Element
+   *  
+   *  Element#getId() -> String | null
+   *  
+   *  Returns `id` for Element, 
+   *  when element without `id` return null. 
+   *  
+   *  #### Example
+   *  
+   *  <div class="class1"></div> 
+   *  <div id="elem" class="class1"></div>
+   *
+   *  $$("div.class1").map(Element.getId)
+   *  // [null, "elem"]
+   *
+  **/
   getId: function(element) {
     return element.id || null;
   },
+  /** section: Dom, related to: Element
+   *  
+   *  Element#classes(element) -> Array
+   *  
+   *  Returns Array of classes for Element.
+   *
+   *  #### Example
+   *  
+   *  <div id="elem" class="class1 class2 class3"></div> 
+   *  
+   *  $("elem").classes();
+   *  // ["class1", "class2", "class3"]
+   *
+  **/
   classes: function(element) {
     return $w(element.readAttribute('class'));
   },
-  getAttributes: function(element) {
-    var hash = $H();
+  /** section: Dom, related to: Element
+   *  
+   *  Element#getAttributes(element, obj) -> ?
+   *  - element(Element): element for method
+   *  - obj(Boolean): when `false` return only object, when `true`
+   *  value for `class` will Array with classes, and value for
+   *  `data` return in inner Object. Default set in `false`.   
+   *
+   *  Returns Object wherein keys is attribute and value is attribute value.   
+   *
+   *  #### Example
+   *
+   *  <div id="elem" data-first="1" data-second="2" data-more="more"
+   *     class="cls1 cls2 cls3"></div> 
+   *  
+   *  $("elem").getAttributes();
+   *  // -> { 
+   *          'id'          : "elem", 
+   *          'data-first'  : "1",
+   *          'data-second' : "2",
+   *          'data-more'   : "more",
+   *          'class'       : "cls1 cls2 cls3"
+   *        }
+   *  $("elem").getAttributes(true);  
+   *  // -> { 
+   *          'id'          : "elem", 
+   *          'data'        : 
+                { 
+                   'first'  : "1",
+   *               'second' : "2",
+   *               'more'   : "more"
+   *            },
+   *          'class'       : ["cls1", "cls2", "cls3"]
+   *        }
+   *
+   *
+  **/  
+  getAttributes: function(element, obj) {
+    var obj  = obj || false,
+        hash = $H();
+    
     for (var i = 0, attrs = element.attributes, 
              length = attrs.length,
              value, key; 
@@ -16,17 +85,20 @@ Element.addMethods({
       key = attrs.item(i).nodeName;
       value = attrs.item(i).nodeValue;
       
-      if (key == 'class')
-        value = $w(value);
+      if (!obj) {
+        if (key == 'class')
+          value = $w(value);
 
-      if (key.startsWith("data-")) {
-        var tmp  = hash.getOrBuild("data", $H({})),  
-            name = /data-(.+)/.exec(key).second();
-        tmp.set(name, value);
-        continue ;
-      }
+        if (key.startsWith("data-")) {
+          var tmp  = hash.getOrBuild("data", $H({})),  
+              name = /data-(.+)/.exec(key).second();
+          tmp.set(name, value);
+          continue ;
+        }
+      }  
       hash.set(key, value);
     }
+    c(hash.toJ())
     return hash.toJ();
   }
 });

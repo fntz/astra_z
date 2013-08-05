@@ -27,6 +27,8 @@ var ZElement = Class.create(Delegatable, {
           self = scheme.getAttributes();
 
       var keys = Object.keys(self);
+
+      //refactor 
       for(var i = 0, l = keys.size(), value, key; i<l;i++) {
         key   = keys[i];
         value = self[key];
