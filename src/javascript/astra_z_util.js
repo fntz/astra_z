@@ -98,7 +98,6 @@ Element.addMethods({
       }  
       hash.set(key, value);
     }
-    c(hash.toJ())
     return hash.toJ();
   }
 });
