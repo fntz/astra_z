@@ -192,7 +192,6 @@ var Translator = {
           else 
             throw "Unexpected $0".exec(current);
 
-
           element.writeAttribute("data-repeat", repeat);
         } 
         else {

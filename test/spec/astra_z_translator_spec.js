@@ -68,6 +68,13 @@ describe("Translator", function() {
     ).toThrow();
   }); 
 
+  it ("unexpected star", function() {
+    var z = "(div)*";
+    expect(
+      function() { Translator.translate(z) }
+    ).toThrow();
+  });
+
   it ("unexpected id", function() {
     var z = "(div#@)";
     expect(
