@@ -30,7 +30,7 @@ var Widget = Class.create(EventsModule, {
     this.create(this.html);
     this.bind_event();
   },
-  create: function() { //TODO: take config, config from setting
+  create: function() { 
     var html = Translator.translate(this.setting.config);
     return html;
   },
@@ -41,7 +41,7 @@ var Widget = Class.create(EventsModule, {
     }
   },
   on: function(event) {
-    
+    throw "Abstract. You must implement `on` function for events";
   }
 }); 
 

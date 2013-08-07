@@ -11,72 +11,22 @@ var ZElement = Class.create(Delegatable, {
     this.delegate("element", 
                   "addClassName", 
                   "writeAttribute",
+                  "readAttribute",
                   "descendants");
   },
   insert: function(z) {
     this.elements.push(z);
     this.element.insert(z.element);
   },
+  tagName: function() {
+    return this.element.tagName.downcase();
+  },
   build: function(original) {
-    var original = $(original);
-
-    //e1 - original
-    //e2 - this
-    var diff_attrs = function(original, scheme) {
-      var orig = original.getAttributes(),
-          self = scheme.getAttributes();
-
-      var keys = Object.keys(self);
-
-      //refactor 
-      for(var i = 0, l = keys.size(), value, key; i<l;i++) {
-        key   = keys[i];
-        value = self[key];
-        if (key == "data")
-          continue;
-        if (key == "class") {
-          value.each(function(k){ original.addClassName(k); });
-        } else {
-          original.writeAttribute(key, value);
-        }      
-      }        
-    };
-
-    var need = this.element.descendants();
-    var have = original.descendants();
-
-    var i = 0, j = 0, k = [];
-
-    while(true) {
-      var current = need[i], 
-          orig    = have[j];
-      
-      if (!orig || !current) {
-        break;
-      }
-    
-      if (current.hasAttribute("data-repeat")) {
-        k.push(i);
-        i = k.pop();
-      }
-            
-      diff_attrs(orig, current)
-
-      i++;
-      j++;
-
-      if (current.hasAttribute("data-more")) {
-        i = 0;  
-      }
-
-      if (i > need.size() || j > have.size()) {
-        break;
-      }
-      
-    } 
     
 
+    
   }
+
 });
 
 
@@ -132,8 +82,9 @@ var Translator = {
           element = new ZElement(next);
           var last = elements.last();
           
-          if (last)
+          if (last) {
             elements.last().insert(element);
+          }  
           else {
             root = element;
           }  
@@ -144,13 +95,14 @@ var Translator = {
         }
 
         else {
-          throw "Expected <tag> but $0 given".exec(next);  
+          throw "Expected <tag> or `*` but $0 given".exec(next);  
         }
       }
 
       else if (current == ")") {
         end_element ++ ;
-        elements.pop();
+        if (tokens[i-2] != "(")
+          elements.pop();
       } 
 
       else if (current.isWorld()) {
@@ -212,23 +164,41 @@ var Translator = {
           throw "Expected `id attr`, but given `$0`".exec(next);
         }
       }
-      
+      // (*) | (tag*) | (tag.className*)
       else if (current == "*") {
         if (!element) 
           throw "Element not found";
-
+        
+        
         //(*)
         if (prev == "(" && next == ")") { 
-          element.writeAttribute("data-repeat", "1");
+          element.writeAttribute("data-break", "1");
         } 
-        //(tag)*
-        else if (prev == ")" &&  
-          ((next && next.isWorld()) || next == ")" || Object.isUndefined(next))) {
-          element.writeAttribute("data-more", "1");
+        //(tag*) | (tag.class*)
+        else if (prev.isWorld()) { 
+          //when prev is tag data-repeat <tag>
+          //when prev is class name data-repeat <tag>.className
+          //otherwise error
+          var repeat = element.readAttribute("data-repeat") || "";
+          var preprev = tokens[i-2];
+
+          if (preprev == ".")
+            if (repeat.blank())   
+              repeat = "$0.$1".exec(element.tagName(), prev);
+            else
+              repeat += ".$0".exec(prev);
+          else if (preprev == "(")
+            repeat = prev;
+          else 
+            throw "Unexpected $0".exec(current);
+
+
+          element.writeAttribute("data-repeat", repeat);
         } 
         else {
           throw "Unexpected `$0` between `$1` and `$2`".exec(current, prev, next);
         }
+        
       }
 
       else {

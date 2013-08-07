@@ -33,13 +33,18 @@ describe("Translator", function() {
     ).toThrow();  
   });
 
-  it ("translate repeat and more", function() {
-    var z = "(div(div.class1(*))*)",
+  it ("translate repeat and break", function() {
+    var z = "(div (div.class1*(*)) (div*) (div.c1*.c2*))",
         t = Translator.translate(z),
         e = t.element;    
     
-    expect(e.down().readAttribute("data-more")).toEqual("1"); 
-    expect(e.down().readAttribute("data-repeat")).toEqual("1");
+    expect(e.down().readAttribute("data-break")).toEqual("1"); 
+    expect(e.down().readAttribute("data-repeat")).toEqual("div.class1");
+    
+    
+    expect(e.down().next().readAttribute("data-repeat")).toEqual("div");
+
+    expect(e.down().next().next().readAttribute("data-repeat")).toEqual("div.c1.c2")
   });
 
   it ("error when after `(` follow not tag", function() {
