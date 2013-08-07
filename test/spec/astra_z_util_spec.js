@@ -142,6 +142,10 @@ describe("String", function() {
     expect("hello".exclude("ol")).toEqual(true);
   });
 
+  it ("#downcase", function() {
+    expect("HELLO".downcase()).toEqual("hello");
+  });
+
 });
 
 describe("Array", function() {

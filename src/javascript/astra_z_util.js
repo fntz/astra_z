@@ -418,6 +418,23 @@ String.prototype.isWorld = function() {
 
 /** section: Language, related to: String
  *  
+ *  String#downcase() -> String
+ *  
+ *  Convert string value to lower case letters. Only wrap on `toLowerCase` method.
+ *  
+ *  #### Example
+ *  
+ *  "HELLO".downcase();  
+ *  // -> heelo 
+ *  
+**/
+String.prototype.downcase = function() {
+  return this.toLowerCase();
+};
+
+
+/** section: Language, related to: String
+ *  
  *  String#exclude(str) -> Boolean
  *  - str (String): string for check  
  *
