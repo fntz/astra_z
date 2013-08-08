@@ -8,14 +8,12 @@ var Accordion = Class.create(Widget, {
       on         : "click",
       events     : {},
       config     : "(div.accordion#accordion \
-                      (div.accordion-group \
-                        (div.accordion-heading!1 \
-                          (*) \
+                      (div.accordion-group* \
+                        (div.accordion-heading \
+                          (a.accordion-toggle!1 (*)) \
                         ) \
-                        (div.accordion-body.collapse.in~1 \
-                          (*) \
-                        ) \
-                      )* \
+                        (div.accordion-body~1.collapse.in (*)) \
+                      ) \
                     )"
     };
   },
@@ -26,7 +24,7 @@ var Accordion = Class.create(Widget, {
     
   },
   on: function(event) {
-    
+    c(event.element())  
   }
 });
 

@@ -22,9 +22,52 @@ var ZElement = Class.create(Delegatable, {
     return this.element.tagName.downcase();
   },
   build: function(original) {
-    
+    //pending
+    /*
+    var original = $(original);
 
-    
+    var self = this.element;
+    var descendants = [this.element, this.element.descendants()].flatten();
+    var orig_descendants = [original, original.descendants()].flatten();
+
+
+    data_repeat = descendants.findAll(function(e) { 
+      return e.hasAttribute("data-repeat");
+    });
+/*
+    var o = [];
+    data_repeat.each(function(e) {
+      var t0 = $(e.ancestors().first()).getTagName();
+      var find = "$0 > $1".exec(t0, e.getTagName());
+      
+
+    });
+*/
+/*    
+    var o = [];
+    data_repeat.each(function(dr) {
+      for(var i = 0, e, l = orig_descendants.size(); i < l; i++) {
+        e = orig_descendants[i];
+
+
+      }
+    });  
+*/
+/*
+    var i = 0, j = 0, k = [];
+    var e0, e1;
+    while(true) {
+      e1 = descendants[i]; //self
+      e0 = orig_descendants[i];//orig
+
+      if (e1.hasAttribute("data-repeat")) {
+        k.push([e1, i]);
+      }
+
+
+      break;
+    }
+    */
   }
 
 });
@@ -128,7 +171,7 @@ var Translator = {
             return hash.keys().first() == next; 
           }) || $H();
           var new_hash = $H({});
-          new_hash.set(next, [prev]);
+          new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
           hash.updateWith(new_hash, function(v1, v2) {
             var v = v1.concat(v2);
             return v;
@@ -146,7 +189,7 @@ var Translator = {
             return hash.keys().first() == next; 
           }) || $H();
           var new_hash = $H({});
-          new_hash.set(next, [prev]);
+          new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
           hash.updateWith(new_hash, function(v1, v2) {
             var v = v1.concat(v2);
             return v;

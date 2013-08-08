@@ -1,4 +1,7 @@
 Element.addMethods({
+  getTagName: function(element) {
+    return element.tagName.downcase();
+  },
   /** section: Dom, related to: Element
    *  
    *  Element#getId() -> String | null

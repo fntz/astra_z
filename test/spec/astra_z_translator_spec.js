@@ -24,8 +24,8 @@ describe("Translator", function() {
         h = b.first();
 
     expect(b.size()).toEqual(2);
-    expect(h.get("from")).toEqual(['class1', 'class2']);
-    expect(h.get("to")).toEqual(['class3']);  
+    expect(h.get("from")).toEqual(['div.class1', 'div.class2']);
+    expect(h.get("to")).toEqual(['div.class3']);  
 
     var e = "(div.class1~1)";
     expect(
