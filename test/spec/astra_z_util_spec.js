@@ -1,4 +1,15 @@
 describe("Element", function() {
+  it ("#isShow #isHide", function() {
+    var e = new Element('div');
+    e.hide();
+
+    expect(e.isShow()).toEqual(false);
+
+    e.show();
+
+    expect(e.isHide()).toEqual(false);
+  }); 
+
   it ("#getId", function() {
     var e = new Element('div', {"id": "id1"});
     var k = new Element('div');

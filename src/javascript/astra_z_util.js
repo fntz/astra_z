@@ -1,4 +1,13 @@
 Element.addMethods({
+  isShow: function(element) {
+    var e = $(element);
+    if (e.style.display != 'none')
+      return true;
+    return false;
+  },
+  isHide: function(element) {
+    return !element.isShow();
+  },
   getTagName: function(element) {
     return element.tagName.downcase();
   },
