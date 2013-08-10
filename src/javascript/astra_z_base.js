@@ -36,7 +36,14 @@ var Widget = Class.create(EventsModule, {
   bind_event: function() {
     if (this.setting.on) {
       var handler = this.on.bind(this);
-      this.element.observe(this.setting.on, handler);
+        
+      if (Object.isArray(this.setting.on)) {
+        this.setting.on.each(function(on) {
+          this.element.observe(on, handler);
+        }.bind(this));
+      } else {
+        this.element.observe(this.setting.on, handler);
+      }
     }
   },
   on: function(event) {
