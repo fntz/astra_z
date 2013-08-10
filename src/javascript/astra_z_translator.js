@@ -166,12 +166,18 @@ var Translator = {
       }
 
       else if (current == "~") {
+        var preprev = tokens[i-2];
+        
         if (prev.isWorld()) {
+
           var hash = group_a.detect(function(hash) {
             return hash.keys().first() == next; 
           }) || $H();
           var new_hash = $H({});
-          new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
+          if (preprev == "(") //when tag
+            new_hash.set(next, ["$0".exec(prev)]);
+          else 
+            new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
           hash.updateWith(new_hash, function(v1, v2) {
             var v = v1.concat(v2);
             return v;
@@ -183,13 +189,19 @@ var Translator = {
       }
 
       else if (current == "!") {
-        
+        var preprev = tokens[i-2];
+
         if (prev.isWorld()) {
           var hash = group_b.detect(function(hash) {
             return hash.keys().first() == next; 
           }) || $H();
           var new_hash = $H({});
-          new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
+          
+          if (preprev == "(") //when tag
+            new_hash.set(next, ["$0".exec(prev)]);
+          else 
+            new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
+          
           hash.updateWith(new_hash, function(v1, v2) {
             var v = v1.concat(v2);
             return v;
