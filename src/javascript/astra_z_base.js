@@ -18,15 +18,14 @@ var EventsModule = {
 
 
 var Widget = Class.create(EventsModule, {
-  initialize: function(element, setting, classes) {
+  initialize: function(element, setting) {
     this.element = $(element);
 
     if (!Object.isElement(this.element))
       throw "Element #{e} not found.".interpolate({e: element});
 
     Object.extend(this.setting, setting || {});
-    Object.extend(this.classes, classes || {});
-
+    
     this.create(this.html);
     this.bind_event();
   },
