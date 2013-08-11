@@ -128,6 +128,32 @@ Element.addMethods({
       element.removeClassName(klass);
     });
     return element;
+  },
+  /** section: Dom, related to: Element
+   *  
+   *  Element#addClasses(element, classes) -> Element
+   *  - classes(String | Array): add `classes` to `element` 
+   *  
+   *
+   *  #### Example
+   *  
+   *  <div id="elem" class=""></div> 
+   *  
+   *  $("elem").addClasses("foo", "bar");
+   *  $("elem").classes(); 
+   *  // ["foo", "bar"]
+   *  // or 
+   *  $("elem").addClasses(["foo", "bar"]);
+   *  $("elem").classes(); 
+   *  // ["foo", "bar"]
+   *
+  **/
+  addClasses: function(element) {
+    var element = $(element);
+    $A(arguments).slice(1).flatten().each(function(klass) {
+      element.addClassName(klass);
+    });
+    return element;
   }
 });
 
