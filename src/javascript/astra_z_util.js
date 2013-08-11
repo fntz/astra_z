@@ -102,8 +102,37 @@ Element.addMethods({
       hash.set(key, value);
     }
     return hash.toJ();
+  },
+  /** section: Dom, related to: Element
+   *  
+   *  Element#removeClasses(element, classes) -> Element
+   *  - classes(String | Array): remove `classes` from `element` 
+   *  
+   *
+   *  #### Example
+   *  
+   *  <div id="elem" class="foo bar baz"></div> 
+   *  
+   *  $("elem").removeClasses("foo", "bar");
+   *  $("elem").classes(); 
+   *  // ["baz"]
+   *  // or 
+   *  $("elem").removeClasses(["foo", "bar"]);
+   *  $("elem").classes(); 
+   *  // ["baz"]
+   *
+  **/
+  removeClasses: function(element) {
+    var element = $(element);
+    $A(arguments).slice(1).flatten().each(function(klass) {
+      element.removeClassName(klass);
+    });
+    return element;
   }
 });
+
+
+
 
 
 /** section: Language, related to: Array
