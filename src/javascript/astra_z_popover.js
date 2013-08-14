@@ -1,23 +1,26 @@
 
-var Tooltip = Class.create(Widget, {
-  setup: function() {
+
+
+var Popover = Class.create(Widget, {
+
+  setup: function($super) {
     this.setting = {
       animation : false, //effects.js depends
       html      : false,
       placement : "top", //"top | bottom | right | left | auto"
       selector  : false, // 
-      title     : "tooltip",     
-      trigger   : $w("mouseenter mouseleave"), 
+      title     : "popover",     
+      trigger   : "click", 
       delay     : 0,
       container : false, // or Element
-      config    : "(div.tooltip    \
-                     (div.tooltip-arrow) \
-                     (div.tooltip-inner) \
-                   )", 
+      config    : "(div.popover \
+                      (div.arrow) \
+                      (h3.popover-title) \
+                      (div.popover-content)\
+                    )", 
       events    : {}
     };
-
-    this.main_class = "tooltip";
+    this.main_class = "popover";
     this.events = $w("show hide");
     this.setting["on"] = this.setting.trigger;
     
@@ -93,7 +96,7 @@ var Tooltip = Class.create(Widget, {
     switch(this.setting.placement) {
       case "top": 
         left = elem_x + w0/2 - w1/4; 
-        top  = elem_y - 4*min; //why 4*min ?
+        top  = elem_y - 6*min; 
         break;
 
       case "bottom": 
@@ -102,13 +105,13 @@ var Tooltip = Class.create(Widget, {
         break;
 
       case "left": 
-        top  = elem_y + h0/2 - h1/4;
+        top  = elem_y + h0 - h1/2;
         left = elem_x - w1; 
         break; 
         
 
       case "right":
-        top  = elem_y + h0/2 - h1/4;
+        top  = elem_y + h0 - h1/2;
         left = elem_x + w0 + 2.5*min; //?
         break;    
     }
