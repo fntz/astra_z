@@ -98,7 +98,55 @@ var Translator = {
       if (!t.blank())
         tokens.push(s.first());
     });
-    
+   
+    var Z = Class.create({
+      initialize: function() {
+        this._end_element   = 0;
+        this._begin_element = 0;
+        this._group_a = [];
+        this._group_b = [];
+        this._elements = [];
+        this._root = null;
+        this._element;
+
+        this.delegate("this._elements", "last", "push", "pop");
+
+        var g = {
+          star  : "*",
+          tilde : "~",
+          sharp : "#",
+          dot   : ".",
+          bang  : "!",
+          rb    : ")",
+          lb    : "("
+        };
+
+        $H(g).eachPair(function(k, v) {
+          this[k] = v;
+        }.bind(this));
+      },
+      root: function(root) {
+        if (root)
+          this._root = root;
+        else
+          return this._root;
+      },
+      end: function() {
+        this._end_element++;
+      },
+      begin: function() {
+        this._begin_element++;
+      },
+      get_begin: function() {
+        return this._begin_element;
+      },
+      get_end: function() {
+        return this._end_element;
+      }  
+    });
+
+    var z = new Z();
+
     var group_a = [],
         group_b = [];
 
@@ -110,16 +158,17 @@ var Translator = {
 
     for(var i = 0, n = i+1, p = i - 1, 
             length = tokens.length, 
-            prev, current, next; 
+            prev, current, next, preprev; 
             i < length; 
             i ++, n ++, p ++) {
       
       next    = tokens[n];
       current = tokens[i];
       prev    = tokens[p];
+      preprev = tokens[i-2];
 
-      if (current == "(") { 
-        begin_element ++ ;
+      if (current == z.lb) { 
+        z.begin();
         
         if (next.isWorld()) {
           element = new ZElement(next);
@@ -133,7 +182,7 @@ var Translator = {
           }  
           elements.push(element);
         } 
-        else if (next == "*") {
+        else if (next == z.star) {
           continue;
         }
 
@@ -142,9 +191,9 @@ var Translator = {
         }
       }
 
-      else if (current == ")") {
-        end_element ++ ;
-        if (tokens[i-2] != "(")
+      else if (current == z.rb) {
+        z.end() ;
+        if (preprev != z.lb)
           elements.pop();
       } 
 
@@ -157,7 +206,7 @@ var Translator = {
         }
       } 
       
-      else if (current == ".") {
+      else if (current == z.dot) {
         if (next.isWorld()) {
           element.addClassName(next);
         } else {
@@ -165,7 +214,7 @@ var Translator = {
         }
       }
 
-      else if (current == "~") {
+      else if (current == z.tilde) {
         var preprev = tokens[i-2];
         
         if (prev.isWorld()) {
@@ -174,7 +223,7 @@ var Translator = {
             return hash.keys().first() == next; 
           }) || $H();
           var new_hash = $H({});
-          if (preprev == "(") //when tag
+          if (preprev == z.lb) //when tag
             new_hash.set(next, ["$0".exec(prev)]);
           else 
             new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
@@ -188,7 +237,7 @@ var Translator = {
         }
       }
 
-      else if (current == "!") {
+      else if (current == z.bang) {
         var preprev = tokens[i-2];
 
         if (prev.isWorld()) {
@@ -197,7 +246,7 @@ var Translator = {
           }) || $H();
           var new_hash = $H({});
           
-          if (preprev == "(") //when tag
+          if (preprev == z.lb) //when tag
             new_hash.set(next, ["$0".exec(prev)]);
           else 
             new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
@@ -212,7 +261,7 @@ var Translator = {
         }
       }    
       
-      else if (current == "#") {
+      else if (current == z.sharp) {
         if (next.isWorld()) {
           element.writeAttribute({'id': next})
         } else {
@@ -220,13 +269,13 @@ var Translator = {
         }
       }
       // (*) | (tag*) | (tag.className*)
-      else if (current == "*") {
+      else if (current == z.star) {
         if (!element) 
           throw "Element not found";
         
         
         //(*)
-        if (prev == "(" && next == ")") { 
+        if (prev == z.lb && next == z.rb) { 
           element.writeAttribute("data-break", "1");
         } 
         //(tag*) | (tag.class*)
@@ -235,14 +284,13 @@ var Translator = {
           //when prev is class name data-repeat <tag>.className
           //otherwise error
           var repeat = element.readAttribute("data-repeat") || "";
-          var preprev = tokens[i-2];
-
-          if (preprev == ".")
+          
+          if (preprev == z.dot)
             if (repeat.blank())   
               repeat = "$0.$1".exec(element.tagName(), prev);
             else
               repeat += ".$0".exec(prev);
-          else if (preprev == "(")
+          else if (preprev == z.lb)
             repeat = prev;
           else 
             throw "Unexpected $0".exec(current);
