@@ -20,56 +20,7 @@ var ZElement = Class.create(Delegatable, {
   },
   tagName: function() {
     return this.element.tagName.downcase();
-  },
-  build: function(original) {
-    //pending
-    /*
-    var original = $(original);
-
-    var self = this.element;
-    var descendants = [this.element, this.element.descendants()].flatten();
-    var orig_descendants = [original, original.descendants()].flatten();
-
-
-    data_repeat = descendants.findAll(function(e) { 
-      return e.hasAttribute("data-repeat");
-    });
-/*
-    var o = [];
-    data_repeat.each(function(e) {
-      var t0 = $(e.ancestors().first()).getTagName();
-      var find = "$0 > $1".exec(t0, e.getTagName());
-      
-
-    });
-*/
-/*    
-    var o = [];
-    data_repeat.each(function(dr) {
-      for(var i = 0, e, l = orig_descendants.size(); i < l; i++) {
-        e = orig_descendants[i];
-
-
-      }
-    });  
-*/
-/*
-    var i = 0, j = 0, k = [];
-    var e0, e1;
-    while(true) {
-      e1 = descendants[i]; //self
-      e0 = orig_descendants[i];//orig
-
-      if (e1.hasAttribute("data-repeat")) {
-        k.push([e1, i]);
-      }
-
-
-      break;
-    }
-    */
   }
-
 });
 
 
@@ -99,17 +50,15 @@ var Translator = {
         tokens.push(s.first());
     });
    
-    var Z = Class.create({
+    var Z = Class.create(Delegatable, {
       initialize: function() {
         this._end_element   = 0;
         this._begin_element = 0;
-        this._group_a = [];
-        this._group_b = [];
         this._elements = [];
         this._root = null;
         this._element;
 
-        this.delegate("this._elements", "last", "push", "pop");
+        this.delegate("_elements", "last", "push", "pop");
 
         var g = {
           star  : "*",
@@ -131,6 +80,12 @@ var Translator = {
         else
           return this._root;
       },
+      element: function(e) {
+        if (e) 
+          this._element = e;
+        else
+          return this._element;
+      },
       end: function() {
         this._end_element++;
       },
@@ -148,12 +103,7 @@ var Translator = {
     var z = new Z();
 
     var group_a = [],
-        group_b = [];
-
-    var begin_element = 0, 
-        end_element = 0,
-        elements = [],
-        root = null,
+        group_b = [],
         element;
 
     for(var i = 0, n = i+1, p = i - 1, 
@@ -169,23 +119,21 @@ var Translator = {
 
       if (current == z.lb) { 
         z.begin();
-        
         if (next.isWorld()) {
           element = new ZElement(next);
-          var last = elements.last();
+          var last = z.last();
           
           if (last) {
-            elements.last().insert(element);
+            z.last().insert(element);
           }  
           else {
-            root = element;
+            z.root(element);
           }  
-          elements.push(element);
+          z.push(element);
         } 
         else if (next == z.star) {
           continue;
         }
-
         else {
           throw "Expected <tag> or `*` but $0 given".exec(next);  
         }
@@ -194,7 +142,7 @@ var Translator = {
       else if (current == z.rb) {
         z.end() ;
         if (preprev != z.lb)
-          elements.pop();
+          z.pop();
       } 
 
       else if (current.isWorld()) {
@@ -215,8 +163,6 @@ var Translator = {
       }
 
       else if (current == z.tilde) {
-        var preprev = tokens[i-2];
-        
         if (prev.isWorld()) {
 
           var hash = group_a.detect(function(hash) {
@@ -238,8 +184,7 @@ var Translator = {
       }
 
       else if (current == z.bang) {
-        var preprev = tokens[i-2];
-
+        
         if (prev.isWorld()) {
           var hash = group_b.detect(function(hash) {
             return hash.keys().first() == next; 
@@ -272,7 +217,6 @@ var Translator = {
       else if (current == z.star) {
         if (!element) 
           throw "Element not found";
-        
         
         //(*)
         if (prev == z.lb && next == z.rb) { 
@@ -309,8 +253,8 @@ var Translator = {
     }
     
 
-    if (begin_element != end_element) { 
-      root = null;
+    if (z.get_begin() != z.get_end()) { 
+      z.root(null);
       throw "Not balance `(` `)`";
     } else {
       var _group_a = group_a.uniq(),
@@ -339,11 +283,10 @@ var Translator = {
           new_hash.set("from", value);
           new_hash.set("to", f_value);
           
-          root.binded.push(new_hash)
+          z.root().binded.push(new_hash)
         }
-      }    
-          
-      return root;
+      }     
+      return z.root();
     }
   }
 };
