@@ -1,4 +1,23 @@
-
+/** section: Widget, related to: Tabs
+ *  
+ *  Tabs implemented
+ *  
+ *  Options: 
+ *   - first_open(Integer): first open element
+ *   - on (String): event for open/close elements
+ *   - events(Object): callbacks for events
+ *   - config(String): html view for widget.
+ *
+ *  Events:
+ *   - on_create
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
 
 var Tabs = Class.create(Widget, {
   setup: function() {
@@ -68,7 +87,6 @@ var Tabs = Class.create(Widget, {
   
   //current_element, binded_element, from_group, to_group
   open: function(current, current_b, from, to) { 
-    
     if (!current_b.visible()) {
       var parents_from = current.ancestors().first();
       parents_from.siblings().invoke('removeClassName', 'active');

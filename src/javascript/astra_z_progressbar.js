@@ -5,7 +5,7 @@
  *  Options:
  *   - width (String): width for progressbar, default: 60%
  *   - step  (Integer): step in percent
- *   - events (?) : callback for events
+ *   - events (Object) : callback for events
  *   - config (String): default config for translate to html.
  *      default: "(div.bar)"   
  *   
