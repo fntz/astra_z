@@ -1,6 +1,10 @@
-var c = function(m){console.log(m);};
+/** section: WidgetModules, related to: EventsModule
+ *
+ *  Create events for Widgets 
+ *
+ *
+**/
 var EventsModule = {
-
   create_events: function() {
     var self = this;
     this.events.each(function(event) {
@@ -12,12 +16,23 @@ var EventsModule = {
         }  
       }
     });
-    
   }
 };
 
 
+/** section: Widget, related to: Widget
+ *  
+ *  Base class for Widgets. All widget is subclasses of this class.
+ *  
+ *  
+**/
 var Widget = Class.create(EventsModule, {
+  /** 
+   *  Widget#initialize(element [, setting])
+   *  - element(String|Element): element for widget
+   *  - setting(Object): Object with options for widget 
+   * 
+  **/
   initialize: function(element, setting) {
     this.element = $(element);
 
@@ -33,6 +48,11 @@ var Widget = Class.create(EventsModule, {
     var html = Translator.translate(this.setting.config);
     return html;
   },
+  /**
+   *  Widget#bind_event
+   *  bind `setting.on` event with `on` method  
+   *
+  **/
   bind_event: function() {
     if (this.setting.on) {
       var handler = this.on.bind(this);
@@ -46,6 +66,12 @@ var Widget = Class.create(EventsModule, {
       }
     }
   },
+  /**
+   *  Widget#on(event)
+   *   
+   *  called on `event`.
+   *  
+  **/
   on: function(event) {
     throw "Abstract. You must implement `on` function for events";
   }
