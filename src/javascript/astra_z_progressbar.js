@@ -1,3 +1,29 @@
+/** section: Widget, related to: ProgressBar
+ *  
+ *  ProgressBar implementation.
+ *
+ *  Options:
+ *   - width (String): width for progressbar, default: 60%
+ *   - step  (Integer): step in percent
+ *   - events (?) : callback for events
+ *   - config (String): default config for translate to html.
+ *      default: "(div.bar)"   
+ *   
+ *  Events:
+ *   - increment (on_increment)
+ *   - decrement (on_decrement)
+ *
+ *  Open methods:
+ *   - increment
+ *   - decrements  
+ *  
+ *  #### Example  
+ *    <div id="progress"></div>
+ *   
+ *    var prb = new ProgressBar("progress");
+ *
+ *
+**/ 
 var ProgressBar = Class.create(Widget, {
   setup: function() {
     this.setting = {
@@ -30,11 +56,3 @@ var ProgressBar = Class.create(Widget, {
     this.on_decrement(nw);
   }
 });
-
-
-
-
-
-
-
-
