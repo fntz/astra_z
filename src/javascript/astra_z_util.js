@@ -550,10 +550,20 @@ String.prototype.exec = function() {
 };
 
 
-
+/** section: Ext, related to: Delegate
+ *  
+ *  Provides delegate behaviour for methods. 
+ *
+**/
 var Delegatable = {
-    /**
-     *  Example
+    /** section: Ext, related to: Delegate
+     *  
+     *  Delegate#delegate(from, *methods) -> void
+     *  - from(String): property 
+     *  - *methods(String): methods for delegate `base` class to 
+     *  target property `from`   
+     *
+     *  #### Example
      *
      *  var A = Class.create({
      *    some_method: function() {  
@@ -592,12 +602,27 @@ var Delegatable = {
       });
 
     },
-    /**
-     *  from   - object
-     *  as     - Array | String
-     *  method - Array | String
-     *  Example:
-     *     delegate_alias(target, ['a','b','c'], ['x','y','z']); 
+    /** section: Ext, related to: Delegate
+     *  
+     *  Delegate#delegate_alias(from, as, to) -> void
+     *  - from(String): property
+     *  - as(Array[String]): array of methods which will called on `base` class
+     *  - to(Array[String]): array of methods which will called with property
+     *
+     *  
+     * #### Example:
+     *
+     *  class MyArray(Delegate, {
+     *    initialize: function(arr) {
+     *      this.array = arr;
+     *      this.delegate_alias("this.array", ["count"], ["size"]);
+     *    }
+     *  });  
+     *
+     *  var arr = new MyArray([1,2,3]);
+     *  arr.count();   
+     *  // -> 3
+     *
     **/
     delegate_alias: function(from, as, method) {
       var as = [as].flatten(),

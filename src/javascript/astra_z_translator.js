@@ -7,7 +7,6 @@ var ZElement = Class.create(Delegatable, {
     this.element = new Element(element, attrs || {});
     this.elements = [];
     this.binded  = [];
-
     this.delegate("element", 
                   "addClassName", 
                   "writeAttribute",
