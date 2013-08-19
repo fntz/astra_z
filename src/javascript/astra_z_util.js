@@ -589,18 +589,16 @@ var Delegatable = {
      *
     **/  
     delegate: function(from) {
-      var instance = this[from];
-      var self = this;
+      var instance = this[from], self = this;
       $A(arguments).slice(1).each(function(method) {
         var func = instance[method];
-        if (!(Object.isUndefined(func) || Object.isFunction(func)))
+        if (!Object.isFunction(func))
           throw "Error! Delegate only for methods";
         
         self[method] = function() {
           return func.apply(instance, arguments);
         }; 
       });
-
     },
     /** section: Ext, related to: Delegate
      *  
@@ -615,7 +613,7 @@ var Delegatable = {
      *  class MyArray(Delegate, {
      *    initialize: function(arr) {
      *      this.array = arr;
-     *      this.delegate_alias("this.array", ["count"], ["size"]);
+     *      this.delegate_alias("array", ["count"], ["size"]);
      *    }
      *  });  
      *
@@ -625,7 +623,7 @@ var Delegatable = {
      *
     **/
     delegate_alias: function(from, as, method) {
-      var as = [as].flatten(),
+      var as = [as].flatten(), 
           method = [method].flatten();
       
       if (as.size() != method.size())
@@ -633,11 +631,11 @@ var Delegatable = {
 
       for (var i=0; i < as.size(); i++) {
         var func = this[from][method[i]];
-        if (!(Object.isUndefined(func) || Object.isFunction(func)))
+        if (!Object.isFunction(func))
             throw "Error! Delegate only for methods";
         
         this[as[i]] = function() {
-          return func.apply(this[from], arguments);
+          return func.apply(this[from], $A(arguments));
         }; 
       }  
     }
