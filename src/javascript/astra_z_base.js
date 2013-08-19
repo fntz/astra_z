@@ -53,7 +53,7 @@ var Widget = Class.create(EventsModule, {
 
 Widget.prototype.initialize = Widget.prototype.initialize.wrap(
     function(func) {
-      this.events = $w('create destroy add remove open close');
+      this.events = $w('create open close');
       this.setup();
       this.create_events();
       return func.apply(this, $A(arguments).slice(1));
