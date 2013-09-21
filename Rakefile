@@ -21,7 +21,7 @@ SOURCE_DIR  = ROOT.join("src")
 SOURCE_FILE = "astra_z.js"
 OUTPUT       = BUILD_DIR.join(SOURCE_FILE)
 VERSION_FILE = "version.yaml"
-VERSION = YAML.load_file("#{SOURCE_DIR}/#{VERSION_FILE}")['VERSION'] 
+VERSION = YAML.load_file("#{SOURCE_DIR}/#{VERSION_FILE}")['ASTRA_Z_VERSION'] 
 
 task :compile do
   FileUtils.rm OUTPUT if File.exist?(OUTPUT)

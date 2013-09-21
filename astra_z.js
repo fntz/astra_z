@@ -1,958 +1,3 @@
-
-
-var Accordion = Class.create(Widget, {
-  setup: function() {
-    this.setting = {
-      first_open : 0,
-      all_closed : false, //pending
-      on         : "click",
-      events     : {},
-      config     : "(div.accordion#accordion \
-                      (div.accordion-group* \
-                        (div.accordion-heading \
-                          (a.accordion-toggle~1 (*)) \
-                        ) \
-                        (div.accordion-body!1.collapse.in (*)) \
-                      ) \
-                    )"
-    };
-  },
-  create: function($super) {
-    this.binded = $super().binded;
-    
-    var element    = this.element,
-        width      = this.setting.width,
-        first_open = this.setting.first_open;
-
-    this.binded.each(function(hash) {
-      hash.get('to').each(function(e) {
-        var elems = $$("$0#$1 $2".exec(element.getTagName(), element.getId(), e));
-        
-        var max_height = "$0px".exec(elems.invoke('getHeight').max());
-        
-        //hide all and set default height
-        elems.invoke('hide').invoke('setStyle', {height: max_height});
-        elems[first_open].show(); //show first
-      }.bind(this));
-    }.bind(this));
-    //fire event
-    this.on_create();
-  },
-  on: function(event) {
-    var element = event.element(),
-        tag     = element.getTagName(),
-        classes = element.classes();
-      
-    this.binded.each(function(hash) {
-      var to = hash.get('to');
-      hash.get('from').each(function(from, current_index) {
-        var tmp  = from.split('.'),
-            t0   = tmp.first(),
-            c0   = tmp.second();
-      
-        if ((tag == t0) && classes.include(c0)) {
-          var current = element, 
-              current_b, 
-              index,
-              from0 = this.element.select(from),
-              to0   = this.element.select(to);
-          from0.each(function(e, i) {
-            if (e == element) {
-              index = i; 
-            }
-          });
-          current_b = $$(to[current_index])[index];
-
-          this.open(current, current_b, from0, to0);
-        }
-      }.bind(this));  
-    }.bind(this));  
-  },
-  
-  //current_element, binded_element, from_group, to_group
-  open: function(current, current_b, from, to) { 
-    
-    if (!current_b.visible()) {
-      to.invoke('hide');
-      current_b.show();
-    }
-    
-  }
-});
-
-
-
-
-
-/** section: WidgetModules, related to: EventsModule
- *
- *  Create events for Widgets 
- *
- *
-**/
-
-var EventsModule = {
-  create_events: function() {
-    var self = this;
-    this.events.each(function(event) {
-      var f = "on_$0".exec(event);
-      self[f] = function() {
-        var func = this.setting[f]; 
-        if (func && Object.isFunction(func)) {
-          func.apply(this, arguments);
-        }  
-      }
-    });
-  }
-};
-
-
-/** section: Widget, related to: Widget
- *  
- *  Base class for Widgets. All widget is subclasses of this class.
- *  
- *  
-**/
-var Widget = Class.create(EventsModule, {
-  /** 
-   *  Widget#initialize(element [, setting])
-   *  - element(String|Element): element for widget
-   *  - setting(Object): Object with options for widget 
-   * 
-  **/
-  initialize: function(element, setting) {
-    this.element = $(element);
-
-    if (!Object.isElement(this.element))
-      throw "Element #{e} not found.".interpolate({e: element});
-
-    Object.extend(this.setting, setting || {});
-    
-    this.create(this.html);
-    this.bind_event();
-  },
-  create: function() { 
-    var html = Translator.translate(this.setting.config);
-    return html;
-  },
-  /**
-   *  Widget#bind_event
-   *  bind `setting.on` event with `on` method  
-   *
-  **/
-  bind_event: function() {
-    if (this.setting.on) {
-      var handler = this.on.bind(this);
-        
-      if (Object.isArray(this.setting.on)) {
-        this.setting.on.each(function(on) {
-          this.element.observe(on, handler);
-        }.bind(this));
-      } else {
-        this.element.observe(this.setting.on, handler);
-      }
-    }
-  },
-  /**
-   *  Widget#on(event)
-   *   
-   *  called on `event`.
-   *  
-  **/
-  on: function(event) {
-    throw "Abstract. You must implement `on` function for events";
-  }
-}); 
-
-Widget.prototype.initialize = Widget.prototype.initialize.wrap(
-    function(func) {
-      this.events = $w('create open close');
-      this.setup();
-      this.create_events();
-      return func.apply(this, $A(arguments).slice(1));
-    }
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/** section: Widget, related to: Popover
- *  
- *  Popover implemented
- *  
- *  Options: 
- *    - animation(Boolean) : css animation for show\hide tooltip 
- *    - html(Boolean)      : insert HTML into tooltip
- *    - placement(String)  : Position "top | bottom | right | left | auto"
- *    - selector(Boolean)  : target 
- *    - title(String)      : title for tooltip     
- *    - trigger(Array)     : how tooltip is triggered 
- *    - delay(Number)      : Time for show\hide
- *    - container(String)  : Element for append tooltip
- *    - config(String)     : html view for widget 
- *    - events(Object)     : callbacks for events
- *
- *  Events:
- *   - on_open 
- *   - on_close
- *  
- *  Open methods:
- *  
- *
- *
-**/
-
-
-
-var Popover = Class.create(Widget, {
-
-  setup: function($super) {
-    this.setting = {
-      animation : false, 
-      html      : false,
-      placement : "top", //"top | bottom | right | left | auto"
-      selector  : false, // 
-      title     : "popover",     
-      trigger   : "click", 
-      delay     : 0,
-      container : false, // or Element
-      config    : "(div.popover \
-                      (div.arrow) \
-                      (h3.popover-title) \
-                      (div.popover-content)\
-                    )", 
-      events    : {}
-    };
-    this.main_class = "popover";
-    this.events = $w("show hide");
-    this.setting["on"] = this.setting.trigger;
-    
-    this._show = false;
-    this._complete;
-  },
-  create: function($super) {
-    var html = $super().element;
-    this._complete = false;
-    this.html = html;
-  },
-  on: function(event) {
-    if (!this._show)
-      this.show();
-    else
-      this.hide();
-  }, 
-  show: function(element) {
-      var html = this.html;
-
-      if (!this._complete) {
-        var container = this.setting.container,
-            title = this.setting.title;
-
-        if (container) {
-          container.insert(html);
-        } else {
-          this.element.insert({after: html});
-        }
-
-        if (this.setting.animation) {
-          html.addClassName("fade");
-        }
-
-        if (this.setting.html) {
-          title = title.unescapeHTML();  
-        } 
-        html.down(1).insert(title);
-
-        this._set_position(html);  
-        html.addClasses(this.setting.placement, this.main_class); 
-        this._complete = true;
-      }  
-      html.addClassName("in");
-      this._show = true;
-      this.on_show();
-  },
-  hide: function() {
-    this.html.removeClassName("in");
-    this._show = false;
-    this.on_hide();
-  },
-
-  _set_position: function(html) {
-    //TODO detect auto
-    
-    html.setStyle({ top: 0, left: 0, display: 'block' });
-    
-    var min = 10; //magic constant :)
-    var left, top;
-    var elem_layout = new Element.Layout(this.element);
-    
-    var elem_x = elem_layout.get('left') + elem_layout.get('margin-left'),
-        elem_y = elem_layout.get('top') + elem_layout.get('margin-top'),
-        elem_w = elem_layout.get('width') + elem_layout.get('margin-right'),
-        elem_h = elem_layout.get('height') + elem_layout.get('margin-bottom');
-
-    var w0 = elem_layout.get('width'),
-        h0 = elem_layout.get('height'),
-        w1 = html.getWidth(),
-        h1 = html.getHeight();
-
-    switch(this.setting.placement) {
-      case "top": 
-        left = elem_x + w0/2 - w1/4; 
-        top  = elem_y - 6*min; 
-        break;
-
-      case "bottom": 
-        left = elem_x + w0/2 - w1/4; 
-        top  = elem_h + elem_y + min;   
-        break;
-
-      case "left": 
-        top  = elem_y + h0 - h1/2;
-        left = elem_x - w1; 
-        break; 
-        
-
-      case "right":
-        top  = elem_y + h0 - h1/2;
-        left = elem_x + w0 + 2.5*min; //?
-        break;    
-    }
-    
-    html.setStyle({top: "$0px".exec(top), left: "$0px".exec(left)});
-  }
-});
-/** section: Widget, related to: ProgressBar
- *  
- *  ProgressBar implementation.
- *
- *  Options:
- *   - width (String): width for progressbar, default: 60%
- *   - step  (Integer): step in percent
- *   - events (Object) : callback for events
- *   - config (String): default config for translate to html.
- *      default: "(div.bar)"   
- *   
- *  Events:
- *   - increment (on_increment)
- *   - decrement (on_decrement)
- *
- *  Open methods:
- *   - increment
- *   - decrements  
- *  
- *  #### Example  
- *    <div id="progress"></div>
- *   
- *    var prb = new ProgressBar("progress");
- *
- *
-**/
- 
-var ProgressBar = Class.create(Widget, {
-  setup: function() {
-    this.setting = {
-      width  : "60%",      // default width   
-      step   : 10,         // in percent
-      events : {},         // callbacks for events
-      config : "(div.bar)" // default structure
-    };
-    this.events = $w("increment decrement");
-  },
-  create: function($super) {
-    var html = $super();
-
-    this.bar = html.element;
-    
-    this.bar.setStyle({'width':this.setting.width});
-    this.element.insert(this.bar);
-    this.step = this.element.getWidth()*this.setting.step/100;
-  },
-  increment: function() {
-    var w  = this.bar.getWidth();
-    var nw = "$0px".exec(parseInt(this.step+w));
-    this.bar.setStyle({"width":nw});
-    this.on_increment(nw);
-  },
-  decrement: function() {
-    var w  = this.bar.getWidth();
-    var nw = "$0px".exec(parseInt(w-this.step));
-    this.bar.setStyle({"width":nw});
-    this.on_decrement(nw);
-  }
-});
-/** section: Widget, related to: Tabs
- *  
- *  Tabs implemented
- *  
- *  Options: 
- *   - first_open(Integer): first open element
- *   - on (String): event for open/close elements
- *   - events(Object): callbacks for events
- *   - config(String): html view for widget.
- *
- *  Events:
- *   - on_create
- *   - on_open 
- *   - on_close
- *  
- *  Open methods:
- *  
- *
- *
-**/
-
-
-var Tabs = Class.create(Widget, {
-  setup: function() {
-    this.setting = {
-      first_open : 0,
-      on         : "click",
-      events     : {},
-      config     : "(div \
-                      (ul.nav.nav-tabs \
-                        (li(a~1(*))) \
-                      ) \
-                      (div.tab-content  \
-                        (div.tab-pane*.tab-pane!1(*)) \
-                      )  \
-                    )"
-    };
-  },
-  create: function($super) {
-    this.binded = $super().binded;
-
-    var element    = this.element,
-        width      = this.setting.width,
-        first_open = this.setting.first_open;
-    
-    this.binded.each(function(hash) {
-      hash.get('to').each(function(e) {
-        var elems = $$("$0#$1 $2".exec(element.getTagName(), element.getId(), e));
-        
-        elems.invoke('hide');
-        elems[first_open].show();
-      }.bind(this));
-    }.bind(this));
-
-    this.on_create(); //TODO bind this
-  },
-  on: function(event) {
-    var element = event.element(),
-        tag     = element.getTagName(),
-        classes = element.classes();
-    
-    this.binded.each(function(hash) {
-      var to = hash.get('to');
-      
-      hash.get('from').each(function(from, current_index) {
-        var tmp  = from.split('.'),
-            t0   = tmp.first(),
-            c0   = tmp.second();
-        
-        if ((tag == t0)) { //classes ?
-          var current = element, 
-              current_b, 
-              index,
-              from0 = this.element.select(from),
-              to0   = this.element.select(to);
-          from0.each(function(e, i) {
-            if (e == element) {
-              index = i; 
-            }
-          });
-          current_b = $$(to[current_index])[index];
-
-          this.open(current, current_b, from0, to0);
-        }
-      }.bind(this));  
-    }.bind(this)); 
-  },
-  
-  //current_element, binded_element, from_group, to_group
-  open: function(current, current_b, from, to) { 
-    if (!current_b.visible()) {
-      var parents_from = current.ancestors().first();
-      parents_from.siblings().invoke('removeClassName', 'active');
-      parents_from.addClassName('active');
-      
-      to.invoke('hide')
-      .invoke('removeClassName', 'in')
-      .invoke('removeClassName', 'active');
-      current_b.show().addClassName('in').addClassName('active');
-    }
-  }
-});
-/** section: Widget, related to: Tooltip
- *  
- *  Tooltip implemented
- *  
- *  Options: 
- *    - animation(Boolean) : css animation for show\hide tooltip 
- *    - html(Boolean)      : insert HTML into tooltip
- *    - placement(String)  : Position "top | bottom | right | left | auto"
- *    - selector(Boolean)  : target 
- *    - title(String)      : title for tooltip     
- *    - trigger(Array)     : how tooltip is triggered 
- *    - delay(Number)      : Time for show\hide
- *    - container(String)  : Element for append tooltip
- *    - config(String)     : html view for widget 
- *    - events(Object)     : callbacks for events
- *
- *  Events:
- *   - on_open 
- *   - on_close
- *  
- *  Open methods:
- *  
- *
- *
-**/
-
-var Tooltip = Class.create(Widget, {
-  setup: function() {
-    this.setting = {
-      animation : false, 
-      html      : false,
-      placement : "top", //"top | bottom | right | left | auto"
-      selector  : false, // 
-      title     : "tooltip",     
-      trigger   : $w("mouseenter mouseleave"), 
-      delay     : 0,
-      container : false, // or Element
-      config    : "(div.tooltip    \
-                     (div.tooltip-arrow) \
-                     (div.tooltip-inner) \
-                   )", 
-      events    : {}
-    };
-
-    this.main_class = "tooltip";
-    this.events = $w("show hide");
-    this.setting["on"] = this.setting.trigger;
-    
-    this._show = false;
-    this._complete;
-  },
-  create: function($super) {
-    var html = $super().element;
-    this._complete = false;
-    this.html = html;
-  },
-  on: function(event) {
-    if (!this._show)
-      this.show();
-    else
-      this.hide();
-  }, 
-  show: function(element) {
-      var html = this.html;
-
-      if (!this._complete) {
-        var container = this.setting.container,
-            title = this.setting.title;
-
-        if (container) {
-          container.insert(html);
-        } else {
-          this.element.insert({after: html});
-        }
-
-        if (this.setting.animation) {
-          html.addClassName("fade");
-        }
-
-        if (this.setting.html) {
-          title = title.unescapeHTML();  
-        } 
-        html.down(1).insert(title);
-
-        this._set_position(html);  
-        html.addClasses(this.setting.placement, this.main_class); 
-        this._complete = true;
-      }  
-      html.addClassName("in");
-      this._show = true;
-      this.on_show();
-  },
-  hide: function() {
-    this.html.removeClassName("in");
-    this._show = false;
-    this.on_hide();
-  },
-
-  _set_position: function(html) {
-    //TODO detect auto
-    
-    html.setStyle({ top: 0, left: 0, display: 'block' });
-    
-    var min = 10; //magic constant :)
-    var left, top;
-    var elem_layout = new Element.Layout(this.element);
-    var arrow = new Element.Layout(this.html.select(".tooltip-arrow").first());
-    var html0 = new Element.Layout(this.html);
-    
-    var arrow_w = arrow.get("width"),
-        arrow_h = arrow.get("height"),
-        arrow_mx = arrow.get("margin-left");
-
-    var elem_x  = elem_layout.get('left'),
-        elem_y  = elem_layout.get('top'),
-        elem_mx = elem_layout.get('margin-left'),
-        elem_my = elem_layout.get('margin-top'),
-        elem_w  = elem_layout.get('width'),
-        elem_mw = elem_layout.get('margin-right'),
-        elem_h  = elem_layout.get('height'), 
-        elem_wh = elem_layout.get('margin-bottom');
-    
-    var w0 = elem_layout.get('width'),
-        h0 = elem_layout.get('height'),
-        w1 = html0.get('width'),
-        h1 = html0.get('height'),
-        ml = html0.get('margin-left'),
-        mr = html0.get('margin-right'),
-        mt = html0.get('margin-top'),
-        mb = html0.get('margin-bottom');
-
-    switch(this.setting.placement) {
-      case "top": 
-        left = elem_x + w0/2 - w1/4; 
-        top  = elem_y - 4*min; 
-        break;
-
-      case "bottom": 
-        left = elem_x + w0/2 - w1/4; 
-        top  = elem_h + elem_y + min;   
-        break;
-
-      case "left": 
-        top  = elem_y + h0/2 - h1/4;
-        left = elem_x - w1 - arrow_w - arrow_mx - mr - elem_mx; 
-        break; 
-        
-      case "right":
-        top  = elem_y + h0/2 - h1/4;
-        left = elem_x + w0 + 2.5*min; 
-        break;    
-    }
-    
-    html.setStyle({top: "$0px".exec(top), left: "$0px".exec(left)});
-  }
-});
-
-var c = function(m){console.log(m)};
-
-
-var ZElement = Class.create(Delegatable, {
-  initialize: function(element, attrs) {
-    this.element = new Element(element, attrs || {});
-    this.elements = [];
-    this.binded  = [];
-    this.delegate("element", 
-                  "addClassName", 
-                  "writeAttribute",
-                  "readAttribute",
-                  "descendants");
-  },
-  insert: function(z) {
-    this.elements.push(z);
-    this.element.insert(z.element);
-  },
-  tagName: function() {
-    return this.element.tagName.downcase();
-  }
-});
-
-
-
-/** section Modules  
- *  
- *  Provides base interface for creation elements from String
- *  with given rules.
- *
- *  #### Example
- *  
- *  var z = "(div.class1#id1)";
- *  Translator.translate(z); 
- *  // -> <div class='astra-z-div'> <div class='class1' id='id1'></div></div>  
- *   
-**/
-var Translator = {
-
-  translate: function(str) {
-
-    var tokens = [];
-    
-    str.scan(/[a-zA-Z0-9-]+|./, function(s) {
-      var t = s.first().strip();
-      
-      if (!t.blank())
-        tokens.push(s.first());
-    });
-   
-    var Z = Class.create(Delegatable, {
-      initialize: function() {
-        this._end_element   = 0;
-        this._begin_element = 0;
-        this._elements = [];
-        this._root = null;
-        this._element;
-
-        this.delegate("_elements", "last", "push", "pop");
-
-        var g = {
-          star  : "*",
-          tilde : "~",
-          sharp : "#",
-          dot   : ".",
-          bang  : "!",
-          rb    : ")",
-          lb    : "("
-        };
-
-        $H(g).eachPair(function(k, v) {
-          this[k] = v;
-        }.bind(this));
-      },
-      root: function(root) {
-        if (root)
-          this._root = root;
-        else
-          return this._root;
-      },
-      element: function(e) {
-        if (e) 
-          this._element = e;
-        else
-          return this._element;
-      },
-      end: function() {
-        this._end_element++;
-      },
-      begin: function() {
-        this._begin_element++;
-      },
-      get_begin: function() {
-        return this._begin_element;
-      },
-      get_end: function() {
-        return this._end_element;
-      }  
-    });
-
-    var z = new Z();
-
-    var group_a = [],
-        group_b = [],
-        element;
-
-    for(var i = 0, n = i+1, p = i - 1, 
-            length = tokens.length, 
-            prev, current, next, preprev; 
-            i < length; 
-            i ++, n ++, p ++) {
-      
-      next    = tokens[n];
-      current = tokens[i];
-      prev    = tokens[p];
-      preprev = tokens[i-2];
-
-      if (current == z.lb) { 
-        z.begin();
-        if (next.isWorld()) {
-          element = new ZElement(next);
-          var last = z.last();
-          
-          if (last) {
-            z.last().insert(element);
-          }  
-          else {
-            z.root(element);
-          }  
-          z.push(element);
-        } 
-        else if (next == z.star) {
-          continue;
-        }
-        else {
-          throw "Expected <tag> or `*` but $0 given".exec(next);  
-        }
-      }
-
-      else if (current == z.rb) {
-        z.end() ;
-        if (preprev != z.lb)
-          z.pop();
-      } 
-
-      else if (current.isWorld()) {
-        if (prev.isWorld()) {
-          throw "Unexpected `$0`".exec(current);
-        } 
-        else {
-          continue;
-        }
-      } 
-      
-      else if (current == z.dot) {
-        if (next.isWorld()) {
-          element.addClassName(next);
-        } else {
-          throw "Expected `class name`, but given `$0`".exec(next);
-        }
-      }
-
-      else if (current == z.tilde) {
-        if (prev.isWorld()) {
-
-          var hash = group_a.detect(function(hash) {
-            return hash.keys().first() == next; 
-          }) || $H();
-          var new_hash = $H({});
-          if (preprev == z.lb) //when tag
-            new_hash.set(next, ["$0".exec(prev)]);
-          else 
-            new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
-          hash.updateWith(new_hash, function(v1, v2) {
-            var v = v1.concat(v2);
-            return v;
-          });
-          group_a.push(hash)
-        } else {
-          throw "Unexpected `$0` before bind `$1`".exec(prev, current);
-        }
-      }
-
-      else if (current == z.bang) {
-        
-        if (prev.isWorld()) {
-          var hash = group_b.detect(function(hash) {
-            return hash.keys().first() == next; 
-          }) || $H();
-          var new_hash = $H({});
-          
-          if (preprev == z.lb) //when tag
-            new_hash.set(next, ["$0".exec(prev)]);
-          else 
-            new_hash.set(next, ["$0.$1".exec(element.tagName() ,prev)]);
-          
-          hash.updateWith(new_hash, function(v1, v2) {
-            var v = v1.concat(v2);
-            return v;
-          });
-          group_b.push(hash)
-        } else {
-          throw "Unexpected `$0` before bind `$1`".exec(prev, current);
-        }
-      }    
-      
-      else if (current == z.sharp) {
-        if (next.isWorld()) {
-          element.writeAttribute({'id': next})
-        } else {
-          throw "Expected `id attr`, but given `$0`".exec(next);
-        }
-      }
-      // (*) | (tag*) | (tag.className*)
-      else if (current == z.star) {
-        if (!element) 
-          throw "Element not found";
-        
-        //(*)
-        if (prev == z.lb && next == z.rb) { 
-          element.writeAttribute("data-break", "1");
-        } 
-        //(tag*) | (tag.class*)
-        else if (prev.isWorld()) { 
-          //when prev is tag data-repeat <tag>
-          //when prev is class name data-repeat <tag>.className
-          //otherwise error
-          var repeat = element.readAttribute("data-repeat") || "";
-          
-          if (preprev == z.dot)
-            if (repeat.blank())   
-              repeat = "$0.$1".exec(element.tagName(), prev);
-            else
-              repeat += ".$0".exec(prev);
-          else if (preprev == z.lb)
-            repeat = prev;
-          else 
-            throw "Unexpected $0".exec(current);
-
-          element.writeAttribute("data-repeat", repeat);
-        } 
-        else {
-          throw "Unexpected `$0` between `$1` and `$2`".exec(current, prev, next);
-        }
-        
-      }
-
-      else {
-        throw "Unexpected $0".exec(current);
-      }
-    }
-    
-
-    if (z.get_begin() != z.get_end()) { 
-      z.root(null);
-      throw "Not balance `(` `)`";
-    } else {
-      var _group_a = group_a.uniq(),
-          _group_b = group_b.uniq();
-      
-
-      if (!_group_a.isEmpty()){    
-        if (_group_a.size() != _group_b.size()) {
-          throw "Binded groupd have different size. `$0` and `$1`.\
-          Inspect: $2, $3".exec(_group_a.size(), _group_b.size(),
-            _group_a.inspect(), _group_b.inspect());
-        }
-        
-        for(var len = _group_a.size(), i = 0, 
-                hash, f_value, new_hash, key, value; 
-                i < len; i ++) {
-          new_hash = new Hash();
-          
-          key   = _group_a[i].keys().first();
-          value = _group_a[i].get(key);
-          
-          f_value = _group_b.detect(function(hash) {
-            return hash.keys().first() == key;
-          }).get(key);
-          
-          new_hash.set("from", value);
-          new_hash.set("to", f_value);
-          
-          z.root().binded.push(new_hash)
-        }
-      }     
-      return z.root();
-    }
-  }
-};
 Element.addMethods({
   getTagName: function(element) {
     return element.tagName.downcase();
@@ -1596,6 +641,315 @@ var Delegatable = {
     }
   }
 ;
+var ASTRA_Z = {
+
+  VERSION : '0.0.1'
+}; 
+
+
+/** section: WidgetModules, related to: EventsModule
+ *
+ *  Create events for Widgets 
+ *
+ *
+**/
+
+var EventsModule = {
+  create_events: function() {
+    var self = this;
+    this.events.each(function(event) {
+      var f = "on_$0".exec(event);
+      self[f] = function() {
+        var func = this.setting[f]; 
+        if (func && Object.isFunction(func)) {
+          func.apply(this, arguments);
+        }  
+      }
+    });
+  }
+};
+
+
+/** section: Widget, related to: Widget
+ *  
+ *  Base class for Widgets. All widget is subclasses of this class.
+ *  
+ *  
+**/
+var Widget = Class.create(EventsModule, {
+  /** 
+   *  Widget#initialize(element [, setting])
+   *  - element(String|Element): element for widget
+   *  - setting(Object): Object with options for widget 
+   * 
+  **/
+  initialize: function(element, setting) {
+    this.element = $(element);
+
+    if (!Object.isElement(this.element))
+      throw "Element #{e} not found.".interpolate({e: element});
+
+    Object.extend(this.setting, setting || {});
+    
+    this.create(this.html);
+    this.bind_event();
+  },
+  create: function() { 
+    var html = Translator.translate(this.setting.config);
+    return html;
+  },
+  /**
+   *  Widget#bind_event
+   *  bind `setting.on` event with `on` method  
+   *
+  **/
+  bind_event: function() {
+    if (this.setting.on) {
+      var handler = this.on.bind(this);
+        
+      if (Object.isArray(this.setting.on)) {
+        this.setting.on.each(function(on) {
+          this.element.observe(on, handler);
+        }.bind(this));
+      } else {
+        this.element.observe(this.setting.on, handler);
+      }
+    }
+  },
+  /**
+   *  Widget#on(event)
+   *   
+   *  called on `event`.
+   *  
+  **/
+  on: function(event) {
+    throw "Abstract. You must implement `on` function for events";
+  }
+}); 
+
+Widget.prototype.initialize = Widget.prototype.initialize.wrap(
+    function(func) {
+      this.events = $w('create open close');
+      this.setup();
+      this.create_events();
+      return func.apply(this, $A(arguments).slice(1));
+    }
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var Accordion = Class.create(Widget, {
+  setup: function() {
+    this.setting = {
+      first_open : 0,
+      all_closed : false, //pending
+      on         : "click",
+      events     : {},
+      config     : "(div.accordion#accordion \
+                      (div.accordion-group* \
+                        (div.accordion-heading \
+                          (a.accordion-toggle~1 (*)) \
+                        ) \
+                        (div.accordion-body!1.collapse.in (*)) \
+                      ) \
+                    )"
+    };
+  },
+  create: function($super) {
+    this.binded = $super().binded;
+    
+    var element    = this.element,
+        width      = this.setting.width,
+        first_open = this.setting.first_open;
+
+    this.binded.each(function(hash) {
+      hash.get('to').each(function(e) {
+        var elems = $$("$0#$1 $2".exec(element.getTagName(), element.getId(), e));
+        
+        var max_height = "$0px".exec(elems.invoke('getHeight').max());
+        
+        //hide all and set default height
+        elems.invoke('hide').invoke('setStyle', {height: max_height});
+        elems[first_open].show(); //show first
+      }.bind(this));
+    }.bind(this));
+    //fire event
+    this.on_create();
+  },
+  on: function(event) {
+    var element = event.element(),
+        tag     = element.getTagName(),
+        classes = element.classes();
+      
+    this.binded.each(function(hash) {
+      var to = hash.get('to');
+      hash.get('from').each(function(from, current_index) {
+        var tmp  = from.split('.'),
+            t0   = tmp.first(),
+            c0   = tmp.second();
+      
+        if ((tag == t0) && classes.include(c0)) {
+          var current = element, 
+              current_b, 
+              index,
+              from0 = this.element.select(from),
+              to0   = this.element.select(to);
+          from0.each(function(e, i) {
+            if (e == element) {
+              index = i; 
+            }
+          });
+          current_b = $$(to[current_index])[index];
+
+          this.open(current, current_b, from0, to0);
+        }
+      }.bind(this));  
+    }.bind(this));  
+  },
+  
+  //current_element, binded_element, from_group, to_group
+  open: function(current, current_b, from, to) { 
+    
+    if (!current_b.visible()) {
+      to.invoke('hide');
+      current_b.show();
+    }
+    
+  }
+});
+
+
+
+
+
+/** section: Widget, related to: Tabs
+ *  
+ *  Tabs implemented
+ *  
+ *  Options: 
+ *   - first_open(Integer): first open element
+ *   - on (String): event for open/close elements
+ *   - events(Object): callbacks for events
+ *   - config(String): html view for widget.
+ *
+ *  Events:
+ *   - on_create
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
+
+
+var Tabs = Class.create(Widget, {
+  setup: function() {
+    this.setting = {
+      first_open : 0,
+      on         : "click",
+      events     : {},
+      config     : "(div \
+                      (ul.nav.nav-tabs \
+                        (li(a~1(*))) \
+                      ) \
+                      (div.tab-content  \
+                        (div.tab-pane*.tab-pane!1(*)) \
+                      )  \
+                    )"
+    };
+  },
+  create: function($super) {
+    this.binded = $super().binded;
+
+    var element    = this.element,
+        width      = this.setting.width,
+        first_open = this.setting.first_open;
+    
+    this.binded.each(function(hash) {
+      hash.get('to').each(function(e) {
+        var elems = $$("$0#$1 $2".exec(element.getTagName(), element.getId(), e));
+        
+        elems.invoke('hide');
+        elems[first_open].show();
+      }.bind(this));
+    }.bind(this));
+
+    this.on_create(); //TODO bind this
+  },
+  on: function(event) {
+    var element = event.element(),
+        tag     = element.getTagName(),
+        classes = element.classes();
+    
+    this.binded.each(function(hash) {
+      var to = hash.get('to');
+      
+      hash.get('from').each(function(from, current_index) {
+        var tmp  = from.split('.'),
+            t0   = tmp.first(),
+            c0   = tmp.second();
+        
+        if ((tag == t0)) { //classes ?
+          var current = element, 
+              current_b, 
+              index,
+              from0 = this.element.select(from),
+              to0   = this.element.select(to);
+          from0.each(function(e, i) {
+            if (e == element) {
+              index = i; 
+            }
+          });
+          current_b = $$(to[current_index])[index];
+
+          this.open(current, current_b, from0, to0);
+        }
+      }.bind(this));  
+    }.bind(this)); 
+  },
+  
+  //current_element, binded_element, from_group, to_group
+  open: function(current, current_b, from, to) { 
+    if (!current_b.visible()) {
+      var parents_from = current.ancestors().first();
+      parents_from.siblings().invoke('removeClassName', 'active');
+      parents_from.addClassName('active');
+      
+      to.invoke('hide')
+      .invoke('removeClassName', 'in')
+      .invoke('removeClassName', 'active');
+      current_b.show().addClassName('in').addClassName('active');
+    }
+  }
+});
 /** section: Widget, related to: Window
  *  
  *  Window implemented
@@ -1704,6 +1058,377 @@ var Window = Class.create(Widget, {
     }
   }
 });
+
+
+
+
+
+
+
+/** section: Widget, related to: ProgressBar
+ *  
+ *  ProgressBar implementation.
+ *
+ *  Options:
+ *   - width (String): width for progressbar, default: 60%
+ *   - step  (Integer): step in percent
+ *   - events (Object) : callback for events
+ *   - config (String): default config for translate to html.
+ *      default: "(div.bar)"   
+ *   
+ *  Events:
+ *   - increment (on_increment)
+ *   - decrement (on_decrement)
+ *
+ *  Open methods:
+ *   - increment
+ *   - decrements  
+ *  
+ *  #### Example  
+ *    <div id="progress"></div>
+ *   
+ *    var prb = new ProgressBar("progress");
+ *
+ *
+**/
+ 
+var ProgressBar = Class.create(Widget, {
+  setup: function() {
+    this.setting = {
+      width  : "60%",      // default width   
+      step   : 10,         // in percent
+      events : {},         // callbacks for events
+      config : "(div.bar)" // default structure
+    };
+    this.events = $w("increment decrement");
+  },
+  create: function($super) {
+    var html = $super();
+
+    this.bar = html.element;
+    
+    this.bar.setStyle({'width':this.setting.width});
+    this.element.insert(this.bar);
+    this.step = this.element.getWidth()*this.setting.step/100;
+  },
+  increment: function() {
+    var w  = this.bar.getWidth();
+    var nw = "$0px".exec(parseInt(this.step+w));
+    this.bar.setStyle({"width":nw});
+    this.on_increment(nw);
+  },
+  decrement: function() {
+    var w  = this.bar.getWidth();
+    var nw = "$0px".exec(parseInt(w-this.step));
+    this.bar.setStyle({"width":nw});
+    this.on_decrement(nw);
+  }
+});
+/** section: Widget, related to: Tooltip
+ *  
+ *  Tooltip implemented
+ *  
+ *  Options: 
+ *    - animation(Boolean) : css animation for show\hide tooltip 
+ *    - html(Boolean)      : insert HTML into tooltip
+ *    - placement(String)  : Position "top | bottom | right | left | auto"
+ *    - selector(Boolean)  : target 
+ *    - title(String)      : title for tooltip     
+ *    - trigger(Array)     : how tooltip is triggered 
+ *    - delay(Number)      : Time for show\hide
+ *    - container(String)  : Element for append tooltip
+ *    - config(String)     : html view for widget 
+ *    - events(Object)     : callbacks for events
+ *
+ *  Events:
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
+
+var Tooltip = Class.create(Widget, {
+  setup: function() {
+    this.setting = {
+      animation : false, 
+      html      : false,
+      placement : "top", //"top | bottom | right | left | auto"
+      selector  : false, // 
+      title     : "tooltip",     
+      trigger   : $w("mouseenter mouseleave"), 
+      delay     : 0,
+      container : false, // or Element
+      config    : "(div.tooltip    \
+                     (div.tooltip-arrow) \
+                     (div.tooltip-inner) \
+                   )", 
+      events    : {}
+    };
+
+    this.main_class = "tooltip";
+    this.events = $w("show hide");
+    this.setting["on"] = this.setting.trigger;
+    
+    this._show = false;
+    this._complete;
+  },
+  create: function($super) {
+    var html = $super().element;
+    this._complete = false;
+    this.html = html;
+  },
+  on: function(event) {
+    if (!this._show)
+      this.show();
+    else
+      this.hide();
+  }, 
+  show: function(element) {
+      var html = this.html;
+
+      if (!this._complete) {
+        var container = this.setting.container,
+            title = this.setting.title;
+
+        if (container) {
+          container.insert(html);
+        } else {
+          this.element.insert({after: html});
+        }
+
+        if (this.setting.animation) {
+          html.addClassName("fade");
+        }
+
+        if (this.setting.html) {
+          title = title.unescapeHTML();  
+        } 
+        html.down(1).insert(title);
+
+        this._set_position(html);  
+        html.addClasses(this.setting.placement, this.main_class); 
+        this._complete = true;
+      }  
+      html.addClassName("in");
+      this._show = true;
+      this.on_show();
+  },
+  hide: function() {
+    this.html.removeClassName("in");
+    this._show = false;
+    this.on_hide();
+  },
+
+  _set_position: function(html) {
+    //TODO detect auto
+    
+    html.setStyle({ top: 0, left: 0, display: 'block' });
+    
+    var min = 10; //magic constant :)
+    var left, top;
+    var elem_layout = new Element.Layout(this.element);
+    var arrow = new Element.Layout(this.html.select(".tooltip-arrow").first());
+    var html0 = new Element.Layout(this.html);
+    
+    var arrow_w = arrow.get("width"),
+        arrow_h = arrow.get("height"),
+        arrow_mx = arrow.get("margin-left");
+
+    var elem_x  = elem_layout.get('left'),
+        elem_y  = elem_layout.get('top'),
+        elem_mx = elem_layout.get('margin-left'),
+        elem_my = elem_layout.get('margin-top'),
+        elem_w  = elem_layout.get('width'),
+        elem_mw = elem_layout.get('margin-right'),
+        elem_h  = elem_layout.get('height'), 
+        elem_wh = elem_layout.get('margin-bottom');
+    
+    var w0 = elem_layout.get('width'),
+        h0 = elem_layout.get('height'),
+        w1 = html0.get('width'),
+        h1 = html0.get('height'),
+        ml = html0.get('margin-left'),
+        mr = html0.get('margin-right'),
+        mt = html0.get('margin-top'),
+        mb = html0.get('margin-bottom');
+
+    switch(this.setting.placement) {
+      case "top": 
+        left = elem_x + w0/2 - w1/4; 
+        top  = elem_y - 4*min; 
+        break;
+
+      case "bottom": 
+        left = elem_x + w0/2 - w1/4; 
+        top  = elem_h + elem_y + min;   
+        break;
+
+      case "left": 
+        top  = elem_y + h0/2 - h1/4;
+        left = elem_x - w1 - arrow_w - arrow_mx - mr - elem_mx; 
+        break; 
+        
+      case "right":
+        top  = elem_y + h0/2 - h1/4;
+        left = elem_x + w0 + 2.5*min; 
+        break;    
+    }
+    
+    html.setStyle({top: "$0px".exec(top), left: "$0px".exec(left)});
+  }
+});
+/** section: Widget, related to: Popover
+ *  
+ *  Popover implemented
+ *  
+ *  Options: 
+ *    - animation(Boolean) : css animation for show\hide tooltip 
+ *    - html(Boolean)      : insert HTML into tooltip
+ *    - placement(String)  : Position "top | bottom | right | left | auto"
+ *    - selector(Boolean)  : target 
+ *    - title(String)      : title for tooltip     
+ *    - trigger(Array)     : how tooltip is triggered 
+ *    - delay(Number)      : Time for show\hide
+ *    - container(String)  : Element for append tooltip
+ *    - config(String)     : html view for widget 
+ *    - events(Object)     : callbacks for events
+ *
+ *  Events:
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
+
+
+
+var Popover = Class.create(Widget, {
+
+  setup: function($super) {
+    this.setting = {
+      animation : false, 
+      html      : false,
+      placement : "top", //"top | bottom | right | left | auto"
+      selector  : false, // 
+      title     : "popover",     
+      trigger   : "click", 
+      delay     : 0,
+      container : false, // or Element
+      config    : "(div.popover \
+                      (div.arrow) \
+                      (h3.popover-title) \
+                      (div.popover-content)\
+                    )", 
+      events    : {}
+    };
+    this.main_class = "popover";
+    this.events = $w("show hide");
+    this.setting["on"] = this.setting.trigger;
+    
+    this._show = false;
+    this._complete;
+  },
+  create: function($super) {
+    var html = $super().element;
+    this._complete = false;
+    this.html = html;
+  },
+  on: function(event) {
+    if (!this._show)
+      this.show();
+    else
+      this.hide();
+  }, 
+  show: function(element) {
+      var html = this.html;
+
+      if (!this._complete) {
+        var container = this.setting.container,
+            title = this.setting.title;
+
+        if (container) {
+          container.insert(html);
+        } else {
+          this.element.insert({after: html});
+        }
+
+        if (this.setting.animation) {
+          html.addClassName("fade");
+        }
+
+        if (this.setting.html) {
+          title = title.unescapeHTML();  
+        } 
+        html.down(1).insert(title);
+
+        this._set_position(html);  
+        html.addClasses(this.setting.placement, this.main_class); 
+        this._complete = true;
+      }  
+      html.addClassName("in");
+      this._show = true;
+      this.on_show();
+  },
+  hide: function() {
+    this.html.removeClassName("in");
+    this._show = false;
+    this.on_hide();
+  },
+
+  _set_position: function(html) {
+    //TODO detect auto
+    
+    html.setStyle({ top: 0, left: 0, display: 'block' });
+    
+    var min = 10; //magic constant :)
+    var left, top;
+    var elem_layout = new Element.Layout(this.element);
+    
+    var elem_x = elem_layout.get('left') + elem_layout.get('margin-left'),
+        elem_y = elem_layout.get('top') + elem_layout.get('margin-top'),
+        elem_w = elem_layout.get('width') + elem_layout.get('margin-right'),
+        elem_h = elem_layout.get('height') + elem_layout.get('margin-bottom');
+
+    var w0 = elem_layout.get('width'),
+        h0 = elem_layout.get('height'),
+        w1 = html.getWidth(),
+        h1 = html.getHeight();
+
+    switch(this.setting.placement) {
+      case "top": 
+        left = elem_x + w0/2 - w1/4; 
+        top  = elem_y - 6*min; 
+        break;
+
+      case "bottom": 
+        left = elem_x + w0/2 - w1/4; 
+        top  = elem_h + elem_y + min;   
+        break;
+
+      case "left": 
+        top  = elem_y + h0 - h1/2;
+        left = elem_x - w1; 
+        break; 
+        
+
+      case "right":
+        top  = elem_y + h0 - h1/2;
+        left = elem_x + w0 + 2.5*min; //?
+        break;    
+    }
+    
+    html.setStyle({top: "$0px".exec(top), left: "$0px".exec(left)});
+  }
+});
+
+
+
 
 
 
