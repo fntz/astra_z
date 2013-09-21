@@ -7,7 +7,7 @@ require 'yaml'
 
 Bundler.require
 
-
+#Helper module for colorize output
 module Colorize 
   extend self
 
@@ -37,9 +37,12 @@ BUILD_DIR   = ROOT.join(".")
 SOURCE_DIR  = ROOT.join("src")
 SOURCE_FILE = "astra_z.js"
 OUTPUT       = BUILD_DIR.join(SOURCE_FILE)
+BROWSERS = ["opera", "chromium-browser", "firefox"]
+TEST_PATH = ROOT.join("test/SpecRunner.html")
 VERSION_FILE = "version.yaml"
 VERSION = YAML.load_file("#{SOURCE_DIR}/#{VERSION_FILE}")['ASTRA_Z_VERSION'] 
 
+desc "Join files into one source"
 task :compile do
   FileUtils.rm OUTPUT if File.exist?(OUTPUT)
 
@@ -55,11 +58,12 @@ task :compile do
   end
 end
 
-BROWSERS = ["opera", "chromium-browser", "firefox"]
-TEST_PATH = ROOT.join("test/SpecRunner.html")
-
+desc "Run test in browser passed in arguments."
+#
+# rake test opera
+#
 task :test do  
-  browser = ARGV[1]
+  browser = ARGV[1] || "firefox"
   
   puts Colorize.green"Run test with `#{browser}` browser"
   puts Colorize.yellow(
