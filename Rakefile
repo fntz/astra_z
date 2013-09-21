@@ -4,6 +4,7 @@ require 'pathname'
 require 'logger'
 require 'fileutils'
 require 'yaml'
+require 'uglifier'
 
 Bundler.require
 
@@ -56,6 +57,13 @@ task :compile do
     assets = sprockets.find_asset(bundle)
     assets.write_to(OUTPUT)
   end
+
+  #Remove comments from file
+  
+  file =Uglifier.compile(File.read(OUTPUT), :compress => false, 
+    :output => {:beautify => true})
+  
+  File.open(OUTPUT, "w"){|f| f.puts file }
 end
 
 desc "Run test in browser passed in arguments."
