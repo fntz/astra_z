@@ -1,0 +1,94 @@
+
+
+var Window = Class.create(Widget, {
+  setup: function() {
+    this.setting = {
+      backdrop   : true,
+      keyboard   : true, 
+      on         : "click",
+      show       : false,
+      remote     : false, //or path 
+      events     : {},
+      config     : "(div.modal                 \
+                      (div.modal-dialog         \
+                        (div.modal-content      \
+                          (div.modal-header     \
+                            (button.close(*))   \
+                            (h4.modal-title(*)) \
+                          )                     \
+                          (div.modal-body(*))   \
+                          (div.modal-footer(*)) \
+                        )                       \
+                      )                         \
+                    )"
+    };
+    this.events = $w("show hide");
+    this._fadeClass = "fade";
+    this._isShow = null;
+  },
+  create: function($super) {
+    this.binded = $super().binded;
+    var element = this.element,
+           self = this;
+
+    if (this.setting.keyboard) {
+      $(document.body).observe("keyup", function(event) {
+        var element = event.element();
+        if (event.keyCode == Event.KEY_ESC) {
+          self.hide();
+        }
+      });
+    }
+      
+    if (this.setting.show) {
+      element.removeClassName(this._fadeClass);
+      this._isShow = true;
+    } else {
+      element.addClassName(this._fadeClass);
+      this._isShow = false;
+    }
+  },
+  on: function(event) {
+    var element = event.element(),
+        tag     = element.getTagName(),
+        classes = element.classes();
+
+    if (tag == "button" && classes.include("close")) {
+      this.hide();
+    }    
+
+  },
+  show: function() {
+    this._isShow = true;
+    this._modale();
+
+    this.on_show();
+  },
+  hide: function() {
+    this._isShow = false;
+    this._modale();
+
+    this.on_hide();
+  },
+  _modale: function () {
+    var id = "$0-$1".exec(this.element.getId(), "modal");
+    
+    if (this._isShow) { //when show
+      this.element.removeClassName(this._fadeClass);
+      var modal = new Element("div", {"id": id})
+      .addClasses("modal-backdrop", "fade", "in");
+      $(document.body).insert(modal);
+    } else {
+      this.element.addClasses(this._fadeClass);
+      $(id).remove();
+    }
+    
+  }
+});
+
+
+
+
+
+
+

@@ -80,10 +80,14 @@ var Tooltip = Class.create(Widget, {
     var left, top;
     var elem_layout = new Element.Layout(this.element);
     
-    var elem_x = elem_layout.get('left') + elem_layout.get('margin-left'),
-        elem_y = elem_layout.get('top') + elem_layout.get('margin-top'),
-        elem_w = elem_layout.get('width') + elem_layout.get('margin-right'),
-        elem_h = elem_layout.get('height') + elem_layout.get('margin-bottom');
+    var elem_x  = elem_layout.get('left'),
+        elem_y  = elem_layout.get('top'),
+        elem_mx = elem_layout.get('margin-left'),
+        elem_my = elem_layout.get('margin-top'),
+        elem_w  = elem_layout.get('width'),
+        elem_mw = elem_layout.get('margin-right'),
+        elem_h  = elem_layout.get('height'), 
+        elem_wh = elem_layout.get('margin-bottom');
 
     var w0 = elem_layout.get('width'),
         h0 = elem_layout.get('height'),
