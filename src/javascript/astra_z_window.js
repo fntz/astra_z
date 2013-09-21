@@ -1,4 +1,25 @@
-
+/** section: Widget, related to: Window
+ *  
+ *  Window implemented
+ *  
+ *  Options: 
+ *   - backdrop(Boolean): Create  a modal-backdrop element.
+ *   - keyboard(Boolean): close widget on `ESC` press
+ *   - show(Boolean): Shows the modal when initialized.
+ *   - remote(Boolean|String): Load from `path` and include in `content`.
+ *   - on (String): event for open/close elements
+ *   - events(Object): callbacks for events
+ *   - config(String): html view for widget.
+ *
+ *  Events:
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *   - show 
+ *   - hide
+ *
+**/
 
 var Window = Class.create(Widget, {
   setup: function() {
@@ -6,7 +27,7 @@ var Window = Class.create(Widget, {
       backdrop   : true,
       keyboard   : true, 
       on         : "click",
-      show       : false,
+      show       : true,
       remote     : false, //or path 
       events     : {},
       config     : "(div.modal                 \
@@ -82,7 +103,6 @@ var Window = Class.create(Widget, {
       this.element.addClasses(this._fadeClass);
       $(id).remove();
     }
-    
   }
 });
 
