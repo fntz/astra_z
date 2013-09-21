@@ -7,9 +7,26 @@ require 'yaml'
 
 Bundler.require
 
+
+module Colorize 
+  extend self
+
+  def red(msg)
+    "\e[31m#{msg}\e[0m\n"
+  end
+
+  def green(msg)
+    "\e[32m#{msg}\e[0m\n"
+  end
+
+  def yellow(msg)
+    "\e[33m#{msg}\e[0m\n"
+  end  
+end
+
 logger = Logger.new(STDOUT)
 logger.formatter = Proc.new do  |severity, time, progname, msg|
-  "\e[32m#{msg}\e[0m\n"
+  Colorize.green(msg)
 end
 
 
@@ -37,3 +54,22 @@ task :compile do
     assets.write_to(OUTPUT)
   end
 end
+
+BROWSERS = ["opera", "chromium-browser", "firefox"]
+TEST_PATH = ROOT.join("test/SpecRunner.html")
+
+task :test do  
+  browser = ARGV[1]
+  
+  puts Colorize.green"Run test with `#{browser}` browser"
+  puts Colorize.yellow(
+    "Warning! #{browser} not found in known browsers #{BROWSERS}"
+  ) unless BROWSERS.include?(browser)
+
+  `#{browser} #{TEST_PATH}`
+
+  task browser.to_sym do ; end
+end 
+
+
+
