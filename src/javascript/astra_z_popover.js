@@ -1,11 +1,35 @@
-
+/** section: Widget, related to: Popover
+ *  
+ *  Popover implemented
+ *  
+ *  Options: 
+ *    - animation(Boolean) : css animation for show\hide tooltip 
+ *    - html(Boolean)      : insert HTML into tooltip
+ *    - placement(String)  : Position "top | bottom | right | left | auto"
+ *    - selector(Boolean)  : target 
+ *    - title(String)      : title for tooltip     
+ *    - trigger(Array)     : how tooltip is triggered 
+ *    - delay(Number)      : Time for show\hide
+ *    - container(String)  : Element for append tooltip
+ *    - config(String)     : html view for widget 
+ *    - events(Object)     : callbacks for events
+ *
+ *  Events:
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
 
 
 var Popover = Class.create(Widget, {
 
   setup: function($super) {
     this.setting = {
-      animation : false, //effects.js depends
+      animation : false, 
       html      : false,
       placement : "top", //"top | bottom | right | left | auto"
       selector  : false, // 

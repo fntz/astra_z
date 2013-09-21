@@ -1,8 +1,32 @@
-
+/** section: Widget, related to: Tooltip
+ *  
+ *  Tooltip implemented
+ *  
+ *  Options: 
+ *    - animation(Boolean) : css animation for show\hide tooltip 
+ *    - html(Boolean)      : insert HTML into tooltip
+ *    - placement(String)  : Position "top | bottom | right | left | auto"
+ *    - selector(Boolean)  : target 
+ *    - title(String)      : title for tooltip     
+ *    - trigger(Array)     : how tooltip is triggered 
+ *    - delay(Number)      : Time for show\hide
+ *    - container(String)  : Element for append tooltip
+ *    - config(String)     : html view for widget 
+ *    - events(Object)     : callbacks for events
+ *
+ *  Events:
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
 var Tooltip = Class.create(Widget, {
   setup: function() {
     this.setting = {
-      animation : false, //effects.js depends
+      animation : false, 
       html      : false,
       placement : "top", //"top | bottom | right | left | auto"
       selector  : false, // 
@@ -79,7 +103,13 @@ var Tooltip = Class.create(Widget, {
     var min = 10; //magic constant :)
     var left, top;
     var elem_layout = new Element.Layout(this.element);
+    var arrow = new Element.Layout(this.html.select(".tooltip-arrow").first());
+    var html0 = new Element.Layout(this.html);
     
+    var arrow_w = arrow.get("width"),
+        arrow_h = arrow.get("height"),
+        arrow_mx = arrow.get("margin-left");
+
     var elem_x  = elem_layout.get('left'),
         elem_y  = elem_layout.get('top'),
         elem_mx = elem_layout.get('margin-left'),
@@ -88,16 +118,20 @@ var Tooltip = Class.create(Widget, {
         elem_mw = elem_layout.get('margin-right'),
         elem_h  = elem_layout.get('height'), 
         elem_wh = elem_layout.get('margin-bottom');
-
+    
     var w0 = elem_layout.get('width'),
         h0 = elem_layout.get('height'),
-        w1 = html.getWidth(),
-        h1 = html.getHeight();
+        w1 = html0.get('width'),
+        h1 = html0.get('height'),
+        ml = html0.get('margin-left'),
+        mr = html0.get('margin-right'),
+        mt = html0.get('margin-top'),
+        mb = html0.get('margin-bottom');
 
     switch(this.setting.placement) {
       case "top": 
         left = elem_x + w0/2 - w1/4; 
-        top  = elem_y - 4*min; //why 4*min ?
+        top  = elem_y - 4*min; 
         break;
 
       case "bottom": 
@@ -107,13 +141,12 @@ var Tooltip = Class.create(Widget, {
 
       case "left": 
         top  = elem_y + h0/2 - h1/4;
-        left = elem_x - w1; 
+        left = elem_x - w1 - arrow_w - arrow_mx - mr - elem_mx; 
         break; 
         
-
       case "right":
         top  = elem_y + h0/2 - h1/4;
-        left = elem_x + w0 + 2.5*min; //?
+        left = elem_x + w0 + 2.5*min; 
         break;    
     }
     
