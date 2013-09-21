@@ -76,4 +76,4 @@ task :test do
 end 
 
 
-
+task :default => :compile
