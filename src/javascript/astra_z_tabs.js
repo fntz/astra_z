@@ -57,7 +57,7 @@ var Tabs = Class.create(Widget, {
     var element = event.element(),
         tag     = element.getTagName(),
         classes = element.classes();
-      c(this.binded)
+    
     this.binded.each(function(hash) {
       var to = hash.get('to');
       
