@@ -1,5 +1,6 @@
 //=require astra_z_util
 //=require astra_z_version
+//=require astra_z_translator
 //=require astra_z_base
 //=require astra_z_accordion
 //=require astra_z_tabs
