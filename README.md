@@ -16,8 +16,6 @@ Also added methods for Prototype.js `AstraZ.UTIL`
 Features
 --------------------------
 
-* Very simple
-* Object Oriented 
 * Simple custmized 
 * Any css framework integration[Bootstrap, Zurb ...]. Default: Bootstrap
 * Redefine build-in widgets
