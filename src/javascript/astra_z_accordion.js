@@ -27,15 +27,16 @@ var Accordion = Class.create(Widget, {
       all_closed : false, //pending
       on         : "click",
       events     : {},
-      config     : "(div.accordion#accordion \
-                      (div.accordion-group* \
-                        (div.accordion-heading \
+      config     : "(div.panel-group \
+                      (div.panel* \
+                        (div.panel-heading \
                           (a.accordion-toggle~1 (*)) \
                         ) \
-                        (div.accordion-body!1.collapse.in (*)) \
+                        (div.panel-collapse!1.collapse.in (*)) \
                       ) \
                     )"
     };
+    this._inClass = "in"
   },
   create: function($super) {
     this.binded = $super().binded;
@@ -43,18 +44,6 @@ var Accordion = Class.create(Widget, {
     var element    = this.element,
         width      = this.setting.width,
         first_open = this.setting.first_open;
-
-    this.binded.each(function(hash) {
-      hash.get('to').each(function(e) {
-        var elems = $$("$0#$1 $2".exec(element.getTagName(), element.getId(), e));
-        
-        var max_height = "$0px".exec(elems.invoke('getHeight').max());
-        
-        //hide all and set default height
-        elems.invoke('hide').invoke('setStyle', {height: max_height});
-        elems[first_open].show(); //show first
-      }.bind(this));
-    }.bind(this));
     //fire event
     this.on_create();
   },
@@ -91,12 +80,12 @@ var Accordion = Class.create(Widget, {
   
   //current_element, binded_element, from_group, to_group
   open: function(current, current_b, from, to) { 
-    
-    if (!current_b.visible()) {
-      to.invoke('hide');
-      current_b.show();
+    var c = function(m){console.log(m);}
+
+    if (!current_b.hasClassName(this._inClass)) {
+      to.without(current_b).invoke("removeClassName", this._inClass);
+      current_b.addClassName(this._inClass);
     }
-    
   }
 });
 
