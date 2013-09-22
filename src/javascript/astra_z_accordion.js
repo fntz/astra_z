@@ -1,4 +1,24 @@
-
+/** section: Widget, related to: Accordion
+ *  
+ *  Accordion implemented
+ *  
+ *  Options: 
+ *   - first_open(Integer): first open element
+ *   - all_closed(Boolean): All panels can be collapsed
+ *   - on (String): event for open/close elements
+ *   - events(Object): callbacks for events
+ *   - config(String): html view for widget.
+ *
+ *  Events:
+ *   - on_create
+ *   - on_open 
+ *   - on_close
+ *  
+ *  Open methods:
+ *  
+ *
+ *
+**/
 
 var Accordion = Class.create(Widget, {
   setup: function() {
