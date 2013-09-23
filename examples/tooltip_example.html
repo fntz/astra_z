@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Prototype.js Menu Example</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
+
+    <script type="text/javascript" src="../astra_z.js"></script>
+    
+
+    <script type="text/javascript">
+      $(document).observe("dom:loaded", function() {
+        new Tooltip("left", {placement: "left"});
+        new Tooltip("top", {placement: "top"});
+        new Tooltip("right", {placement: "right"});
+        new Tooltip("bottom", {placement: "bottom"});
+      });
+    </script>
+    <style type="text/css">
+      div.examples {
+        margin-left: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tooltip Example</h1>
+    <div class="examples">
+      <button id="left" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
+      <button id="top" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="Tooltip on top">Tooltip on top</button>
+      <button id="bottom" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">Tooltip on bottom</button>
+      <button id="right" type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
+    </div>
+  </body>
+</html>
