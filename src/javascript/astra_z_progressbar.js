@@ -30,7 +30,7 @@ var ProgressBar = Class.create(Widget, {
       width  : "60%",      // default width   
       step   : 10,         // in percent
       events : {},         // callbacks for events
-      config : "(div.bar)" // default structure
+      config : "(div.progress-bar)" // default structure
     };
     this.events = $w("increment decrement");
   },

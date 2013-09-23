@@ -235,10 +235,10 @@ var Delegatable = {
         var w = l.uniq(), _ = c.uniq();
         if (!w.isEmpty()) {
             if (w.size() != _.size()) throw "Binded groupd have different size. `$0` and `$1`.          Inspect: $2, $3".exec(w.size(), _.size(), w.inspect(), _.inspect());
-            for (var p, $, v, y, C, x = w.size(), d = 0; x > d; d++) v = new Hash(), y = w[d].keys().first(), 
-            C = w[d].get(y), $ = _.detect(function(t) {
+            for (var p, $, v, y, x, C = w.size(), d = 0; C > d; d++) v = new Hash(), y = w[d].keys().first(), 
+            x = w[d].get(y), $ = _.detect(function(t) {
                 return t.keys().first() == y;
-            }).get(y), v.set("from", C), v.set("to", $), h.root().binded.push(v);
+            }).get(y), v.set("from", x), v.set("to", $), h.root().binded.push(v);
         }
         return h.root();
     }
@@ -366,14 +366,15 @@ var Accordion = Class.create(Widget, {
             remote:!1,
             events:{},
             config:"(div.modal                                       (div.modal-dialog                                 (div.modal-content                                (div.modal-header                                 (button.close(*))                               (h4.modal-title(*))                           )                                               (div.modal-body(*))                             (div.modal-footer(*))                         )                                             )                                             )"
-        }, this.events = $w("show hide"), this._fadeClass = "fade", this._isShow = null;
+        }, this.events = $w("show hide"), this._inClass = "fade", this._isShow = null;
     },
     create:function($super) {
-        this.binded = $super().binded;
-        var t = this.element, e = this;
+        var t = $super();
+        this.binded = t.binded;
+        var e = this.element, i = this;
         this.setting.keyboard && $(document.body).observe("keyup", function(t) {
-            t.element(), t.keyCode == Event.KEY_ESC && e.hide();
-        }), this.setting.show ? (t.removeClassName(this._fadeClass), this._isShow = !0) :(t.addClassName(this._fadeClass), 
+            t.element(), t.keyCode == Event.KEY_ESC && i.hide();
+        }), this.setting.show ? (e.removeClassName(this._fadeClass), this._isShow = !0) :(e.addClassName(this._fadeClass), 
         this._isShow = !1);
     },
     on:function(t) {
@@ -387,14 +388,7 @@ var Accordion = Class.create(Widget, {
         this._isShow = !1, this._modale(), this.on_hide();
     },
     _modale:function() {
-        var t = "$0-$1".exec(this.element.getId(), "modal");
-        if (this._isShow) {
-            this.element.removeClassName(this._fadeClass);
-            var e = new Element("div", {
-                id:t
-            }).addClasses("modal-backdrop", "fade", "in");
-            $(document.body).insert(e);
-        } else this.element.addClasses(this._fadeClass), $(t).remove();
+        "$0-$1".exec(this.element.getId(), "modal"), this._isShow ? this.element.addClasses("in", "fade") :this.element.removeClassName(this._fadeClass);
     }
 }), ProgressBar = Class.create(Widget, {
     setup:function() {
@@ -402,7 +396,7 @@ var Accordion = Class.create(Widget, {
             width:"60%",
             step:10,
             events:{},
-            config:"(div.bar)"
+            config:"(div.progress-bar)"
         }, this.events = $w("increment decrement");
     },
     create:function($super) {

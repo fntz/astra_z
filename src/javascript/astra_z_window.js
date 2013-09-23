@@ -44,11 +44,12 @@ var Window = Class.create(Widget, {
                     )"
     };
     this.events = $w("show hide");
-    this._fadeClass = "fade";
+    this._inClass = "fade";
     this._isShow = null;
   },
   create: function($super) {
-    this.binded = $super().binded;
+    var html = $super();
+    this.binded = html.binded;
     var element = this.element,
            self = this;
 
@@ -95,13 +96,13 @@ var Window = Class.create(Widget, {
     var id = "$0-$1".exec(this.element.getId(), "modal");
     
     if (this._isShow) { //when show
-      this.element.removeClassName(this._fadeClass);
-      var modal = new Element("div", {"id": id})
-      .addClasses("modal-backdrop", "fade", "in");
-      $(document.body).insert(modal);
+      this.element.addClasses("in", "fade");
+      //var modal = new Element("div", {"id": id})
+      //.addClasses("modal-backdrop", "fade", "in");
+      //$(document.body).insert(modal);
     } else {
-      this.element.addClasses(this._fadeClass);
-      $(id).remove();
+      this.element.removeClassName(this._fadeClass);
+      //$(id).remove();
     }
   }
 });
