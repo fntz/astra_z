@@ -30,7 +30,7 @@ var Window = Class.create(Widget, {
       show       : true,
       remote     : false, //or path 
       events     : {},
-      config     : "(div.modal                 \
+      config     : "(div.modal.in.fade          \
                       (div.modal-dialog         \
                         (div.modal-content      \
                           (div.modal-header     \
@@ -63,10 +63,9 @@ var Window = Class.create(Widget, {
     }
       
     if (this.setting.show) {
-      element.removeClassName(this._fadeClass);
+      element.style.display = "block";
       this._isShow = true;
     } else {
-      element.addClassName(this._fadeClass);
       this._isShow = false;
     }
   },
@@ -96,13 +95,14 @@ var Window = Class.create(Widget, {
     var id = "$0-$1".exec(this.element.getId(), "modal");
     
     if (this._isShow) { //when show
-      this.element.addClasses("in", "fade");
-      //var modal = new Element("div", {"id": id})
-      //.addClasses("modal-backdrop", "fade", "in");
-      //$(document.body).insert(modal);
+      this.element.style.display = "block";
+      var modal = new Element("div", {"id": id})
+      .addClasses("modal-backdrop", "fade", "in");
+      $(document.body).insert(modal);
     } else {
+      this.element.style.display = "none";
       this.element.removeClassName(this._fadeClass);
-      //$(id).remove();
+      $(id).remove();
     }
   }
 });
