@@ -175,8 +175,8 @@ var Delegatable = {
             get_end:function() {
                 return this._end_element;
             }
-        }), h = new r(), l = [], c = [], d = 0, u = d + 1, f = d - 1, g = e.length; g > d; d++, 
-        u++, f++) if (a = e[u], s = e[d], n = e[f], o = e[d - 2], s == h.lb) {
+        }), h = new r(), l = [], c = [], d = 0, u = d + 1, g = d - 1, f = e.length; f > d; d++, 
+        u++, g++) if (a = e[u], s = e[d], n = e[g], o = e[d - 2], s == h.lb) {
             if (h.begin(), !a.isWorld()) {
                 if (a == h.star) continue;
                 throw "Expected <tag> or `*` but $0 given".exec(a);
@@ -235,10 +235,10 @@ var Delegatable = {
         var w = l.uniq(), _ = c.uniq();
         if (!w.isEmpty()) {
             if (w.size() != _.size()) throw "Binded groupd have different size. `$0` and `$1`.          Inspect: $2, $3".exec(w.size(), _.size(), w.inspect(), _.inspect());
-            for (var p, $, v, y, x, C = w.size(), d = 0; C > d; d++) v = new Hash(), y = w[d].keys().first(), 
-            x = w[d].get(y), $ = _.detect(function(t) {
+            for (var p, $, v, y, C, x = w.size(), d = 0; x > d; d++) v = new Hash(), y = w[d].keys().first(), 
+            C = w[d].get(y), $ = _.detect(function(t) {
                 return t.keys().first() == y;
-            }).get(y), v.set("from", x), v.set("to", $), h.root().binded.push(v);
+            }).get(y), v.set("from", C), v.set("to", $), h.root().binded.push(v);
         }
         return h.root();
     }
@@ -303,10 +303,10 @@ var Accordion = Class.create(Widget, {
             t.get("from").each(function(t, a) {
                 var o = t.split("."), r = o.first(), h = o.second();
                 if (i == r && n.include(h)) {
-                    var l, c, d = e, u = this.element.select(t), f = this.element.select(s);
+                    var l, c, d = e, u = this.element.select(t), g = this.element.select(s);
                     u.each(function(t, i) {
                         t == e && (c = i);
-                    }), l = $$(s[a])[c], this.open(d, l, u, f);
+                    }), l = $$(s[a])[c], this.open(d, l, u, g);
                 }
             }.bind(this));
         }.bind(this));
@@ -465,23 +465,23 @@ var Accordion = Class.create(Widget, {
         a.get("margin-left")), l = s.get("left"), c = s.get("top"), d = s.get("margin-left"), u = (s.get("margin-top"), 
         s.get("width"), s.get("margin-right"), s.get("height"));
         s.get("margin-bottom");
-        var f = s.get("width"), g = s.get("height"), m = o.get("width"), p = o.get("height"), v = (o.get("margin-left"), 
+        var g = s.get("width"), f = s.get("height"), m = o.get("width"), p = o.get("height"), v = (o.get("margin-left"), 
         o.get("margin-right"));
         switch (o.get("margin-top"), o.get("margin-bottom"), this.setting.placement) {
           case "top":
-            e = l + f / 2 - m / 4, i = c - 4 * n;
+            e = l + g / 2 - m / 4, i = c - 4 * n;
             break;
 
           case "bottom":
-            e = l + f / 2 - m / 4, i = u + c + n;
+            e = l + g / 2 - m / 4, i = u + c + n;
             break;
 
           case "left":
-            i = c + g / 2 - p / 4, e = l - m - r - h - v - d;
+            i = c + f / 2 - p / 4, e = l - m - r - h - v - d;
             break;
 
           case "right":
-            i = c + g / 2 - p / 4, e = l + f + 2.5 * n;
+            i = c + f / 2 - p / 4, e = l + g + 2.5 * n;
         }
         t.setStyle({
             top:"$0px".exec(i),
@@ -499,32 +499,30 @@ var Accordion = Class.create(Widget, {
             trigger:"click",
             delay:0,
             container:!1,
-            config:"(div.popover                       (div.arrow)                       (h3.popover-title)                       (div.popover-content)                    )",
+            config:"(div.popover.in                       (div.arrow)                       (h3.popover-title)                       (div.popover-content)                    )",
             events:{}
         }, this.main_class = "popover", this.events = $w("show hide"), this.setting.on = this.setting.trigger, 
-        this._show = !1, this._complete;
+        this._inClass = "in", this._fadeClass = "fade", this._show = !1, this._complete, 
+        this._cache;
     },
     create:function($super) {
         var t = $super().element;
-        this._complete = !1, this.html = t;
+        this._complete = !1;
+        var e = this.setting.title;
+        this.setting.animation && t.addClassName(this._fadeClass), this.setting.html && (e = e.unescapeHTML()), 
+        t.down(1).insert(e), this.html = t;
     },
     on:function() {
         this._show ? this.hide() :this.show();
     },
     show:function() {
-        var t = this.html;
-        if (!this._complete) {
-            var e = this.setting.container, i = this.setting.title;
-            e ? e.insert(t) :this.element.insert({
-                after:t
-            }), this.setting.animation && t.addClassName("fade"), this.setting.html && (i = i.unescapeHTML()), 
-            t.down(1).insert(i), this._set_position(t), t.addClasses(this.setting.placement, this.main_class), 
-            this._complete = !0;
-        }
-        t.addClassName("in"), this._show = !0, this.on_show();
+        var t = this.html, e = this.setting.container;
+        t.addClasses(this.setting.placement, this.main_class), this._set_position(t), e ? e.insert(t) :this.element.insert({
+            after:t
+        }), this._show = !0, this.on_show();
     },
     hide:function() {
-        this.html.removeClassName("in"), this._show = !1, this.on_hide();
+        this.html.remove(), this._show = !1, this.on_hide();
     },
     _set_position:function(t) {
         t.setStyle({
@@ -532,23 +530,27 @@ var Accordion = Class.create(Widget, {
             left:0,
             display:"block"
         });
-        var e, i, n = 10, s = new Element.Layout(this.element), a = s.get("left") + s.get("margin-left"), o = s.get("top") + s.get("margin-top"), r = (s.get("width") + s.get("margin-right"), 
-        s.get("height") + s.get("margin-bottom")), h = s.get("width"), l = s.get("height"), c = t.getWidth(), d = t.getHeight();
-        switch (this.setting.placement) {
+        var e, i, n = 10, s = new Element.Layout(this.element), a = new Element.Layout(this.html.select(".arrow").first()), o = new Element.Layout(this.html), r = a.get("width"), h = (a.get("height"), 
+        a.get("margin-left")), l = s.get("left"), c = s.get("top"), d = s.get("margin-left"), u = (s.get("margin-top"), 
+        s.get("width"), s.get("margin-right"), s.get("height"));
+        s.get("margin-bottom");
+        var g = s.get("width"), f = s.get("height"), m = o.get("width"), p = o.get("height"), v = (o.get("margin-left"), 
+        o.get("margin-right"));
+        switch (o.get("margin-top"), o.get("margin-bottom"), this.setting.placement) {
           case "top":
-            e = a + h / 2 - c / 4, i = o - 6 * n;
+            e = l + g / 2 - m / 4, i = c - 4 * n;
             break;
 
           case "bottom":
-            e = a + h / 2 - c / 4, i = r + o + n;
+            e = l + g / 2 - m / 4, i = u + c + n;
             break;
 
           case "left":
-            i = o + l - d / 2, e = a - c;
+            i = c + f / 2 - p / 4, e = l - m - r - h - v - d;
             break;
 
           case "right":
-            i = o + l - d / 2, e = a + h + 2.5 * n;
+            i = c + f / 2 - p / 4, e = l + g + 2.5 * n;
         }
         t.setStyle({
             top:"$0px".exec(i),
