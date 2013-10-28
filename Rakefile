@@ -5,8 +5,61 @@ require 'logger'
 require 'fileutils'
 require 'yaml'
 require 'uglifier'
+require 'capybara'
+require 'capybara/poltergeist'
+require 'nokogiri'
+require "colorize"
+
 
 Bundler.require
+
+Capybara.register_driver :poltergeist do |app|
+  Capybara::Poltergeist::Driver.new(app)
+end
+Capybara.current_driver = :poltergeist
+   
+#helpers    
+class Nokogiri::XML::Element
+  def classes
+    self.get_attribute("class").split
+  end
+  def class?(name)
+    classes.include?(name)
+  end
+end
+
+module Test
+  include Capybara::DSL
+  extend self
+
+  def run
+    session = Capybara::Session.new(:poltergeist)
+    session.visit "test/SpecRunner.html"
+    
+    doc = Nokogiri::HTML(session.html)
+
+    failed = doc.css("div#details .failed div.resultMessage.fail").to_enum
+
+    doc.css("div.results > div.summary > div.suite").each do |suite|
+      puts "> #{suite.css("a.description").first.text}"
+
+      suite.css("div").each do |div|
+        text = div.css("a").first.text 
+        if div.class?('specSummary')
+          if div.class?("passed")
+            puts "---- #{text.colorize(:green)}"
+          else
+            puts div.text
+            puts "---- #{text.colorize(:red)}"
+            puts "#{failed.next.text}".colorize(:background => :red)
+          end  
+        end
+        puts "-> #{text}" if div.class?('suite')
+      end
+    end
+  end
+end
+
 
 #Helper module for colorize output
 module Colorize 
@@ -82,6 +135,11 @@ task :test do
 
   task browser.to_sym do ; end
 end 
+
+desc "run tests in console"
+task :console do 
+  Test.run
+end
 
 
 task :default => :compile
