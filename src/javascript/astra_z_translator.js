@@ -1,7 +1,3 @@
-
-var c = function(m){console.log(m)};
-
-
 var ZElement = Class.create(Delegatable, {
   initialize: function(element, attrs) {
     this.element = new Element(element, attrs || {});

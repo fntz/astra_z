@@ -80,8 +80,6 @@ var Accordion = Class.create(Widget, {
   
   //current_element, binded_element, from_group, to_group
   open: function(current, current_b, from, to) { 
-    var c = function(m){console.log(m);}
-
     if (!current_b.hasClassName(this._inClass)) {
       to.without(current_b).invoke("removeClassName", this._inClass);
       current_b.addClassName(this._inClass);

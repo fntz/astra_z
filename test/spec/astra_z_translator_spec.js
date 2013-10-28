@@ -1,5 +1,3 @@
-var c = function(m){console.log(m)};
-
 describe("Translator", function() {
 
   it ("translate elements", function() {
