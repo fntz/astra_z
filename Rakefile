@@ -78,6 +78,33 @@ module Colorize
   end  
 end
 
+module Compile
+  extend self 
+
+  def compile!
+    FileUtils.rm OUTPUT if File.exist?(OUTPUT)
+
+    sprockets = Sprockets::Environment.new(ROOT) do |env|
+      env.logger = LOGGER
+    end
+
+    sprockets.append_path(SOURCE_DIR.join('javascript').to_s)
+    
+    BUNDLES.each do |bundle|
+      assets = sprockets.find_asset(bundle)
+      assets.write_to(OUTPUT)
+    end
+
+    #Remove comments from file
+    
+    file =Uglifier.compile(File.read(OUTPUT), :compress => false, 
+      :output => {:beautify => true})
+    
+    File.open(OUTPUT, "w"){|f| f.puts file }
+  end
+end
+
+
 logger = Logger.new(STDOUT)
 logger.formatter = Proc.new do  |severity, time, progname, msg|
   Colorize.green(msg)
@@ -98,32 +125,15 @@ VERSION = YAML.load_file("#{SOURCE_DIR}/#{VERSION_FILE}")['ASTRA_Z_VERSION']
 
 desc "Join files into one source"
 task :compile do
-  FileUtils.rm OUTPUT if File.exist?(OUTPUT)
-
-  sprockets = Sprockets::Environment.new(ROOT) do |env|
-    env.logger = LOGGER
-  end
-
-  sprockets.append_path(SOURCE_DIR.join('javascript').to_s)
-  
-  BUNDLES.each do |bundle|
-    assets = sprockets.find_asset(bundle)
-    assets.write_to(OUTPUT)
-  end
-
-  #Remove comments from file
-  
-  file =Uglifier.compile(File.read(OUTPUT), :compress => false, 
-    :output => {:beautify => true})
-  
-  File.open(OUTPUT, "w"){|f| f.puts file }
+  Compile.compile!
 end
 
 desc "Run test in browser passed in arguments."
 #
 # rake test opera
 #
-task :test do  
+task :test do
+  Compile.compile!  
   browser = ARGV[1] || "firefox"
   
   puts Colorize.green"Run test with `#{browser}` browser"
@@ -138,6 +148,7 @@ end
 
 desc "run tests in console"
 task :console do 
+  Compile.compile!
   Test.run
 end
 
