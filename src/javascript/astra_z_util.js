@@ -108,7 +108,8 @@ Element.addMethods({
    *  Element#removeClasses(element, classes) -> Element
    *  - classes(String | Array): remove `classes` from `element` 
    *  
-   *
+   *  When not classes for remove, then remove all classes.
+   *  
    *  #### Example
    *  
    *  <div id="elem" class="foo bar baz"></div> 
@@ -120,13 +121,22 @@ Element.addMethods({
    *  $("elem").removeClasses(["foo", "bar"]);
    *  $("elem").classes(); 
    *  // ["baz"]
+   *  $("elem").removeClasses();
+   *  $("elem").classes()
+   *  // "" 
    *
   **/
   removeClasses: function(element) {
-    var element = $(element);
-    $A(arguments).slice(1).flatten().each(function(klass) {
-      element.removeClassName(klass);
-    });
+    var element = $(element), 
+        args    = $A(arguments).slice(1);
+    
+    if (args.length != 0) {
+      args.flatten().each(function(klass) {
+        element.removeClassName(klass);
+      });
+    } else {
+      element.className = "";
+    }  
     return element;
   },
   /** section: Dom, related to: Element

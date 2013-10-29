@@ -17,10 +17,10 @@ Element.addMethods({
         return s.toJ();
     },
     removeClasses:function(t) {
-        var t = $(t);
-        return $A(arguments).slice(1).flatten().each(function(e) {
+        var t = $(t), e = $A(arguments).slice(1);
+        return 0 != e.length ? e.flatten().each(function(e) {
             t.removeClassName(e);
-        }), t;
+        }) :t.className = "", t;
     },
     addClasses:function(t) {
         var t = $(t);
@@ -132,6 +132,10 @@ var Delegatable = {
     },
     tagName:function() {
         return this.element.tagName.downcase();
+    },
+    build:function(t) {
+        var e = $(t), i = this.element;
+        c(i.classes()), e.addClasses(i.classes());
     }
 }), Translator = {
     translate:function(t) {

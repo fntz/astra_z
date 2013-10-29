@@ -45,8 +45,16 @@ describe("Element", function() {
       "data-cde" : "b",
       "data-f"   : "c"
     });
-
   });
+
+  it("#removeClasses", function() {
+    var e = new Element('div', {"class": "k1 k2 k3"});
+    e.removeClasses("k1", "k2");
+    expect(e.classes()).toEqual(["k3"]);
+
+    e.removeClasses();
+    expect(e.classes()).toEqual([]);
+  })
 });
 
 describe("Delegatable", function() {
