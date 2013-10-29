@@ -164,6 +164,30 @@ Element.addMethods({
       element.addClassName(klass);
     });
     return element;
+  },
+  /** section: Dom, related to: Element
+   *  
+   *  Element#getPath(element [, level]) -> Element
+   *  - level(Numeric): path the depth 
+   *  
+   *
+   *  #### Example
+   *  
+   *  <div id="id1"><div id="id2"></div></div> 
+   *  
+   *  $("elem").getPath();  // "html > body > div#id1"
+   *  $("elem").getPath(1); // "body > div#id" 
+   *  // ["foo", "bar"]
+   *
+  **/
+  getPath: function(element, level) {
+    return element.ancestors().reverse().slice(level || 0).map(function(e) {
+      if (e.getId()) {
+        return "$0#$1".exec(e.getTagName(), e.getId()) 
+      } else {
+        return e.getTagName();
+      }
+    }).join(">");  
   }
 });
 
